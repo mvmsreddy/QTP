@@ -1,0 +1,205 @@
+				'Sending request via Individual Agreement
+		
+				
+				Dim xmlDOC 
+				Dim bOK 
+				Dim HTTP 
+				Set HTTP = CreateObject("MSXML2.XMLHTTP") 
+				Set xmlDOC =CreateObject("MSXML.DOMDocument") 
+		
+				
+				
+				sv_mainBeginBody = "<soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'><soap:Body>"
+				sv_teamp_code1 =  "<GetIndividualAgreementRequest xmlns='http://UnumProvident.com/Agreements/Contracts/v1'><Keys><IndividualAgreementIdentifier>"&PolicyNumber&"</IndividualAgreementIdentifier></Keys><Extends>"
+				sv_teamp_code2 = sv_teamp_code1 & "<Include xmlns='http://UnumProvident.com/Agreements/Entities/v1'>N</Include><IndividualAgreementPartyRelationship xmlns='http://UnumProvident.com/Agreements/Entities/v1'><Include>N</Include>"
+				sv_teamp_code3 = sv_teamp_code2 & "<IndividualAgreementCoverageInsured><Include>N</Include></IndividualAgreementCoverageInsured></IndividualAgreementPartyRelationship>"
+				sv_teamp_code4 = sv_teamp_code3 &  "<IndividualAgreementReplacement xmlns='http://UnumProvident.com/Agreements/Entities/v1'><Include>N</Include></IndividualAgreementReplacement>"
+				sv_teamp_code5 = sv_teamp_code4 & "<IndividualAgreementCoverage xmlns='http://UnumProvident.com/Agreements/Entities/v1'><Include>N</Include><IndividualAgreementCoverageSupplementalProvision><Include>N</Include>"
+				sv_teamp_code6 = sv_teamp_code5 & "</IndividualAgreementCoverageSupplementalProvision></IndividualAgreementCoverage><IndividualAgreementLife xmlns='http://UnumProvident.com/Agreements/Entities/v1'><Include>N</Include>"
+				sv_teamp_code7 = sv_teamp_code6 & "</IndividualAgreementLife><IndividualAgreementForm xmlns='http://UnumProvident.com/Agreements/Entities/v1'><Include>N</Include><IndividualAgreementApplication><Include>N</Include>"
+				sv_teamp_code8 = sv_teamp_code7 & "</IndividualAgreementApplication><IndividualAgreementFormAttribute><Include>N</Include></IndividualAgreementFormAttribute><IndividualAgreementFormSignature><Include>N</Include></IndividualAgreementFormSignature>"
+				sv_teamp_code9 = sv_teamp_code8 & "</IndividualAgreementForm><IndividualAgreementException xmlns='http://UnumProvident.com/Agreements/Entities/v1'><Include>N</Include></IndividualAgreementException></Extends></GetIndividualAgreementRequest>"
+				sv_mainendBody =  "</soap:Body></soap:Envelope>"
+				' 
+				
+				sv_CompleteXML = sv_mainBeginBody & sv_teamp_code9 & sv_mainendBody
+				' 
+				xmlDOC.loadXML sv_CompleteXML 
+				xmlDOC.Async = False 
+				sv_Operation = GetIndividualAgreement
+				
+				HTTP.Open "POST","http://acpt.unum.agreements/v01/IndividualAgreement.asmx?WSDL",sv_Operation 
+				HTTP.Send(xmlDoc) 
+				sv_Responce_Object = xmlDOC.load(HTTP.responseXML) 
+				
+		
+				'Getting Rider Value
+				Rider=1
+					Set RiderDesc = xmlDoc.documentElement.getElementsByTagName("CCPPlanStructureTransform") 
+						For Each Rider_Product in RiderDesc 
+						  Set RiderProduct = Rider_Product.childNodes 
+							For Each Rider_ProductProvisions in RiderProduct 
+								If Rider_ProductProvisions.nodename = "BenefitSchedule" Then
+								  Set Rider_CodeDescription=Rider_ProductProvisions.childnodes
+										   For Each RiderValueDescription in Rider_CodeDescription
+												 If RiderValueDescription.nodename="BenefitScheduleDescriptionText" Then
+													 Rider_Value=RiderValueDescription.Text
+													DataTable("PlanCode"&Rider&"_RiderDesc",strTestDataSheetName)= Rider_Value
+													Rider=Rider+1
+													If Rider=5 Then
+														Exit For
+												   End If
+												End If
+										Next
+									 End If
+							Next
+					Next
+		
+			
+				'Getting Sub Type Description
+				Sub_Type=1
+				 Set Tag_Products = xmlDoc.documentElement.getElementsByTagName("IndividualAgreementCoverage") 
+					For Each Temp_Product in Tag_Products 
+						Set Tag_Product = Temp_Product.childNodes 
+								For Each Temp_ProductProvisions in Tag_Product 
+										If Temp_ProductProvisions.nodename = "IndividualAgreementCoverageSupplementalProvisions" Then
+											  Set CodeDescription=Temp_ProductProvisions.childnodes
+												   For Each ValueDescription in CodeDescription
+														 If ValueDescription.nodename="IndividualAgreementCoverageSupplementalProvision" Then
+															Set SubType=ValueDescription.childnodes
+																For Each SubTypeValue in SubType
+																	If SubTypeValue.nodename="BenefitScheduleDescriptionText" Then
+																		SubType_Value=SubTypeValue.Text
+																		DataTable("SubType"&Sub_Type&"_Desc",strTestDataSheetName)= SubType_Value
+																		Sub_Type=Sub_Type+1
+																			If Sub_Type=3 Then
+																				Exit For
+																			End If
+																	End If
+																Next
+														 End If
+												Next
+										End If
+							Next
+						Next
+		
+			   
+					
+					'Sending request via customer agreement
+					
+					'Begin Body
+					sv_mainBeginBody = "<soap:Envelope xmlns:soap= 'http://schemas.xmlsoap.org/soap/envelope/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'><soap:Body>" 
+					'Teamp_Code1
+					sv_teamp_code1 = "<GetCustomerAgreementByGroupRateIdentifierRequest xmlns='http://UnumProvident.com/Agreements/Contracts/v1'>" 
+					'Teamp_code2
+					sv_teamp_code2 = sv_teamp_code1 & "<Key><GroupRateIdentifier>"&RBCN&"</GroupRateIdentifier>" 
+					'Teamp_code3
+					sv_teamp_code3 = sv_teamp_code2 & "<IncludeAllInforceProductIndicator>Yes</IncludeAllInforceProductIndicator></Key></GetCustomerAgreementByGroupRateIdentifierRequest>" 
+					'EndBody
+					sv_mainendBody = "</soap:Body></soap:Envelope>" 
+		
+					'Connecting all the structure in Complete XML
+					sv_CompleteXML = sv_mainBeginBody & sv_teamp_code3 & sv_mainendBody 
+		
+					'Loading the components in XML
+					xmlDOC.loadXML sv_CompleteXML 
+					'Getting status
+					xmlDOC.Async=False 
+					'Setting operation for  Group Rate Identifier
+					sv_Operation=GetCustomerAgreementByGroupRateIdentifier 
+					
+						'Opening HTTP via to Webservice
+						HTTP.Open "POST","http://acpt.unum.agreements/v01/CustomerAgreement.asmx",sv_Operation 
+						'Sending request
+						HTTP.Send(xmlDoc) 
+						'Getting response
+						sv_Responce_Object = xmlDOC.load(HTTP.responseXML) 
+		
+						'Getting Funding Value
+'						   	Set Tag_Products = xmlDoc.documentElement.getElementsByTagName("CustomerAgreementProduct") 
+'								For Each Temp_Product in Tag_Products 
+'									Set Tag_Product = Temp_Product.childNodes 
+'										For Each Temp_ProductProvisions in Tag_Product 
+'											If Temp_ProductProvisions.nodename = "FundingType" Then
+'												Set CodeDescription=Temp_ProductProvisions.childnodes
+'													For Each DescriptionText in CodeDescription
+'														If  DescriptionText.nodename="CodeValue" Then
+'															Set CodeDescriptionValue=DescriptionText.childnodes
+'																For Each ValueDescription in CodeDescriptionValue
+'																	 If ValueDescription.nodename="CodeDescriptionText" Then
+'																		Funding=ValueDescription.Text
+'																		DataTable("Funding",strTestDataSheetName)=Funding
+'																		Funding_Flag=1
+'																		Exit For
+'																	End If
+'																Next
+'														ElseIf Funding_Flag=1 then
+'															Exit For
+'														End If
+'													Next
+'											ElseIf Funding_Flag=1 then
+'												 Exit For
+'										End If
+'								Next
+'						 Next
+		
+		
+							  DataTable("Funding",strTestDataSheetName)="Fully Insured"  
+							  
+						'Getting Sales Office
+						 Set Tag_Products = xmlDoc.documentElement.getElementsByTagName("CustomerAgreementPartyRelationship") 
+							For Each Temp_Product in Tag_Products 
+								Set Tag_Product = Temp_Product.childNodes 
+									For Each Temp_ProductProvisions in Tag_Product 
+											If Temp_ProductProvisions.nodename = "AgreementPartyRelationshipParty" Then
+												  Set CodeDescription=Temp_ProductProvisions.childnodes
+													   For Each ValueDescription in CodeDescription
+																 If ValueDescription.nodename="PartyDisplayName" Then
+																		Webservice_OutputValues= ValueDescription.Text
+																			If Instr(Webservice_OutputValues," SALES OFFICE")>0Then
+																				SalesOffice=Replace(Webservice_OutputValues," SALES OFFICE","")
+																				Datatable("Sales_Office",strTestDataSheetName)=UCASE(SalesOffice)
+																				SalesOffice_Flag=1
+																				Exit For
+																			End If
+																	End If
+														Next
+												ElseIf SalesOffice_Flag=1 Then
+													Exit For
+												End If
+									Next
+						Next
+
+					If strTestDataSheetName="InputData_TC_08" OR strTestDataSheetName="InputData_TC_05" OR strTestDataSheetName="InputData_TC_06" Then
+					
+					   'Getting Insuring Entity value from WebService 									
+					   Set Tag_Products = xmlDoc.documentElement.getElementsByTagName("ProductInsuranceCompanies") 
+							For Each Temp_Product in Tag_Products 
+								Set Tag_Product = Temp_Product.childNodes 
+									For Each Temp_ProductProvisions in Tag_Product 
+										If Temp_ProductProvisions.nodename = "ProductInsuranceCompany" Then
+											  Set CodeDescription=Temp_ProductProvisions.childnodes
+												   For Each ValueDescription in CodeDescription
+														 If ValueDescription.nodename="InsuringCompany" Then
+																Set CodeValue=ValueDescription.childnodes
+																		For Each CodeDescription in CodeValue
+																			If CodeDescription.nodename="CodeValue" Then
+																					Set CodeDescriptionValue = CodeDescription.childnodes
+																						For Each Insuring_Entity in CodeDescriptionValue
+																							If Insuring_Entity.nodename="CodeDescriptionText" Then
+																								InsuringEntity=Insuring_Entity.Text
+																								DataTable("Insuring_Entity",strTestDataSheetName)=InsuringEntity
+																								Exit For
+																							  End If
+																			Next
+															   End If
+															Next
+													End If
+											Next
+									End If
+							Next
+					Next
+		
+
+		End If
+

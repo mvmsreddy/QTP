@@ -1,0 +1,75 @@
+'==================================================================================================================================
+' Function Name		:-UDF_AppendDateTime
+'#Description     	:-This function will Append the Date and Time and It will send to variable. 
+'#Input Parameters	: 
+'#Return Values   	:	 
+'==================================================================================================================================
+Public function UDF_AppendDateTime()
+	UDF_str_AppendDateTime =  ""
+	UDF_str_AppendDateTime = Day(Now) & "_" & MonthName(Month(Now),True) & "_" & Year(Now) & "_" & Hour(Now) & "_" & Minute(Now) & "_" & Second(Now)
+	UDF_AppendDateTime = UDF_str_AppendDateTime
+End Function
+'==================================================================================================================================
+
+
+
+
+'==================================================================================================================================
+'#Function Name   : UDF_getFormatTime()
+'#Description     : The function retuns the formatted time & date in detail.
+'#Input Parameters: 
+'#Return Values   : 
+'==================================================================================================================================
+' Function Name		-	UDF_getFormatTime
+
+Public Function UDF_getFormatTime ()
+	UDF_getFormatTime = ""
+	Err.Clear
+	UDF_getFormatTime = MonthName(Month(now),True) & " " & Day(Now) & ", " & Year(Now) & " " & Hour(Now) & ":" & Minute(Now) & ":" & Second(Now)
+ End Function
+'==================================================================================================================================
+
+
+
+
+'==================================================================================================================================
+'#Function Name   : UDF_getTotalTime()
+'#Description     : The function get the Total funtime of the Script. 
+'#Input Parameters: startTime,endTime
+'#Return Values   : TotalTimeTaken                
+'==================================================================================================================================
+
+Public Function UDF_getTotalTime (startTime,endTime)
+	Dim  strTimeDiff,strSec,strMins,strHrs,strTotalTimeTaken
+	strTimeDiff = DateDiff("s",CDate(startTime),CDate(endTime))
+	strSec = CInt(strTimeDiff Mod 60)
+	strMins = CInt((strTimeDiff-strSec) / 60)
+	strHrs = CInt(strMins-(strMins Mod 60)) / 60
+	strMins = CInt(strMins) Mod 60
+	
+	If (Len(strSec) < 2) Then
+			If (strSec="") Then
+				strSec = "00"
+			Else
+				strSec = "0" & strSec
+			End If
+	End If
+	If (Len(strMins) < 2) Then
+			If (strMins="") Then
+				strMins = "00"
+			Else
+				strMins = "0" & strMins
+			End If
+	End If
+	If (Len(strHrs) < 2) Then
+			If (strHrs="") Then
+				strHrs = "00"
+			Else
+				strHrs = "0" & strHrs
+			End If
+	End If
+	strTotalTimeTaken = strHrs & ":" & strMins & ":" & strSec
+	UDF_getTotalTime = strTotalTimeTaken
+	
+End Function
+'==================================================================================================================================

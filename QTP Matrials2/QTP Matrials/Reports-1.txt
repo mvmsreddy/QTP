@@ -1,0 +1,661 @@
+'************************************************************************************************************************************************************
+'Function Name: OpenReport
+'Description : This Function Create a HTML File
+'************************************************************************************************************************************************************
+Public Function OpenReport(WP)
+    If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+RepSession=1
+strDestinationFolder  = g_strOutputPath & "\" & g_Date_Time
+g_EmailDestinationPath = strDestinationFolder & "\"
+ResultPath = strDestinationFolder
+Build_Environment = g_strEnvironment
+set filesys = CreateObject("Scripting.FileSystemObject")
+If filesys.FolderExists(strDestinationFolder) Then
+Else
+	filesys.CreateFolder(strDestinationFolder)
+End If
+'************************************************************************************************************************************************************
+' to copy the image to the result folder
+'************************************************************************************************************************************************************
+strFilePath =g_strMainPath & "\Configuration\csc.JPG"
+strDestination =strDestinationFolder & "\csc.JPG"
+strFilePath1 = g_strMainPath & "\Configuration\unum.JPG"
+strDestination1 =strDestinationFolder & "\unum.JPG"
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+' Copy the file to its destination
+Set objFileCopy = objFSO.GetFile(strFilePath)
+objFileCopy.Copy (strDestination)
+Set objFileCopy1 = objFSO.GetFile(strFilePath1)
+objFileCopy1.Copy (strDestination1)
+'************************************************************************************************************************************************************
+ImagePath = strDestinationFolder & "\"
+
+	intCAFlag=0
+	tmpTCCount=0
+	tmpCAFlag=0
+	dtStartTime=Now()	
+	sv_Pass_Counter=0
+	sv_Fail_Counter=0
+   strSplitTime=Split(Time,":",-1,1)
+   strHtmlFileName = sv_Date_Time
+   sv_File_Name= ResultPath &"\" & WP &".html"
+   g_File_Name = sv_File_Name
+	Set sv_Fs=CreateObject("Scripting.FileSystemObject")
+	Set sv_Open_File=sv_Fs.OpenTextFile(sv_File_Name,2,True)
+    sv_Open_File.writeline "<HTML><title>Results" & "- " & WP & "</title><BODY bgcolor=White><TABLE BORDER=0 CELLPADDING=3 CELLSPACING=1 WIDTH=100%>"
+	sv_Open_File.writeline "<table id=check1><TR COLS=3><TD WIDTH=25%><IMG SRC='" & ImagePath & "unum.jpg'></TD>"
+	sv_Open_File.writeline "<TD WIDTH=75%><h1 align=center><FONT FACE=Calibri COLOR=#00008B> Test Execution Result Summary </Font> </h2></TD>"
+	sv_Open_File.writeline "<TD WIDTH=25% align=Right><IMG SRC='" & ImagePath & "csc.jpg'></TD></TABLE>"
+	sv_Open_File.writeline"<TABLEBORDER=0 BGCOLOR=YELLOW CELLPADDING=3 CELLSPACING=1 WIDTH=100%>"  
+''********************************************************************************************************************
+	sv_Open_File.writeline"<table><TR COLS=3><TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Project Name : Navilink UI <DIV ALIGN=Right></DIV></B></FONT></TD>"
+	sv_Open_File.writeline"<TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Build - Enviornment : " & Build_Environment & " <DIV ALIGN=RIGHT></DIV></B></FONT></TD>"
+	sv_Open_File.writeline"<TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Work Package : " & WP & " <DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR>"
+''****************************Pass Count / Fail Count / Total Count*********************************************
+	sv_Open_File.writeline"<TR COLS=3><TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Pass Count : sv_Pass_Counti <DIV ALIGN=Right></DIV></B></FONT></TD>"
+	sv_Open_File.writeline"<TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Fail Count : sv_Fail_Counti <DIV ALIGN=RIGHT></DIV></B></FONT></TD>"
+	sv_Open_File.writeline"<TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Total Count : sv_Total_Counti <DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR>"
+''****************************Start Time / End Time  / Total Time*********************************************
+	sv_Open_File.writeline"<TR COLS=3><TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Start Time : sv_Start_Timei <DIV ALIGN=Right></DIV></B></FONT></TD>"
+	sv_Open_File.writeline"<TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>End Time : sv_End_Timei <DIV ALIGN=RIGHT></DIV></B></FONT></TD>"
+	sv_Open_File.writeline"<TD BGCOLOR=#D8BFD8 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Total Time : sv_Time_Takeni <DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR>"	
+''********************************************************************************************************************	
+	sv_Open_File.writeline"<TABLEBORDER=0 BGCOLOR=YELLOW CELLPADDING=3 CELLSPACING=1 WIDTH=100%>"	
+	sv_Open_File.Close
+	Set sv_Fs=Nothing
+	Set sv_Open_File=Nothing
+	sv_Start_Time=Now()
+End Function
+'************************************************************************************************************************************************************
+'Function Name: CloseReport
+'Description : This Function Generate Summary for the Executed Test Case(s)
+'************************************************************************************************************************************************************
+Public Function CloseReport()
+     If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   sv_File_Name = g_File_Name
+   If RepSession=1 Then
+		RepSession=0
+		Dim sv_Fs
+		Dim sv_Open_File
+		Set sv_Fs=CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File=sv_Fs.OpenTextFile(sv_File_Name,8,True)
+	
+		'Last
+		If tmpRepCount="" Then
+		   tmpRepCount=0
+		   tmpStartTime=Now()
+	   End If
+	   If tmpRepCount<>0 Then
+			tmpEndTime=Now()
+			If tmpOC="" Then
+				tmpOC=0
+			End If
+			If tmpPC="" Then
+				tmpPC=0
+			End If
+			If tmpFC="" Then
+				tmpFC=0
+			End If
+			tmpOC = tmpPC+tmpFC
+			sv_Open_File.writeline"<table><TR COLS=3><TD BGCOLOR=#FFE4C4 WIDTH=5%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Pass Count : "& tmpPC &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=5%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Fail Count : "& tmpFC &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=5%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Total Count : "& tmpOC &"</B></FONT></TD></TR></table>"
+			sv_Open_File.writeline"<table><TR COLS=3><TD BGCOLOR=#FFE4C4 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Start Time : "& tmpStartTime &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>End Time : "& tmpEndTime &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Time Taken : "& UDF_getTotalTime(tmpStartTime,tmpEndTime) &" </B></FONT></TD></TR></table>"
+			arrPC(tmpTCCount-1)=tmpPC
+			arrFC(tmpTCCount-1)=tmpFC
+			tmpFC=0
+			tmpPC=0
+			tmpOC=0
+			tmpStartTime=Now()
+	   End If
+	   tmpRepCount=tmpRepCount+1
+		'Last
+		dtEndTime=Now()
+		If Others_Count="" Then
+			Others_Count=0
+		End If
+		If Pass_Count="" Then
+			Pass_Count=0
+		End If
+		If Fail_Count="" Then
+			Fail_Count=0
+		End If
+		Others_Count = Pass_Count + Fail_Count
+
+		sv_Open_File.writeline"</TABLE></BODY></HTML>"
+		sv_Open_File.Close
+		Set sv_Fs=Nothing
+		Set sv_Open_File=Nothing
+
+		ForReading = 1
+		ForWriting = 2
+'
+        Set sv_Fs = CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForReading)
+		strText = sv_Open_File.ReadAll
+		sv_Open_File.Close
+		Passcount= Replace(strText, "sv_Pass_Counti", Pass_Count)
+		Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForWriting)
+        sv_Open_File.Writeline Passcount
+		sv_Open_File.Close
+		
+		Set sv_Fs = CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForReading)
+		strText = sv_Open_File.ReadAll
+		sv_Open_File.Close
+		Failcount= Replace(strText, "sv_Fail_Counti", Fail_Count)
+		Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForWriting)
+		sv_Open_File.Writeline Failcount
+		sv_Open_File.Close
+
+		Set sv_Fs = CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForReading)
+		strText = sv_Open_File.ReadAll
+		sv_Open_File.Close
+		Totalcount= Replace(strText, "sv_Total_Counti", Others_Count)
+		Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForWriting)
+		sv_Open_File.Write Totalcount
+		sv_Open_File.Close
+'
+		Set sv_Fs = CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForReading)
+		strText = sv_Open_File.ReadAll
+		sv_Open_File.Close
+		Starttime= Replace(strText, "sv_Start_Timei", dtStartTime)
+		Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForWriting)
+		sv_Open_File.Write Starttime
+		sv_Open_File.Close
+
+		Set sv_Fs = CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForReading)
+		strText = sv_Open_File.ReadAll
+		sv_Open_File.Close
+		Endtime= Replace(strText, "sv_End_Timei", dtEndTime)
+		Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForWriting)
+		sv_Open_File.Write Endtime
+		sv_Open_File.Close
+
+		Set sv_Fs = CreateObject("Scripting.FileSystemObject")
+        Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForReading)
+		strText = sv_Open_File.ReadAll
+		sv_Open_File.Close
+		Totaltime= Replace(strText, "sv_Time_Takeni", UDF_getTotalTime(dtStartTime,dtEndTime))		
+		Set sv_Open_File = sv_Fs.OpenTextFile(sv_File_Name, ForWriting)
+		sv_Open_File.Write Totaltime
+        sv_Open_File.Close
+		
+		Set sv_Fs=Nothing
+		Set sv_Open_File=Nothing	   
+
+        Others_Count =0
+        Pass_Count =0 
+		Fail_Count = 0
+	Else
+		Reporter.ReportEvent micWarning,"Verify whether the Report is Properly Initiated","Report is not Properly Initiated"
+	End If
+	tmpRepCount = ""
+End Function
+
+'************************************************************************************************************************************************************
+'Function Name: WriteReport
+'Description : This Function Writes the Reporter Event
+'************************************************************************************************************************************************************
+
+Public Function WriteReport(sDescription,sExpected,sActual,sResult)
+     If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   sv_File_Name = g_File_Name
+   If RepSession=1  Then
+	   
+		Dim sv_Fs
+		Dim sv_Open_File
+		Set sv_Fs=CreateObject("Scripting.FileSystemObject")
+		Set sv_Open_File=sv_Fs.OpenTextFile(sv_File_Name,8,True)
+		If Reporter.Filter=0 Then
+			If Ucase(sResult)="P" Then
+				sResult="PASS"
+				Pass_Count=Pass_Count + 1
+				tmpPC=tmpPC+1
+			   sv_Open_File.writeline"<TR COLS=4 ><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sDescription &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sExpected &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sActual &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=100%><FONT FACE=VERDANA COLOR=GREEN SIZE=1><B> "& sResult &" </B></FONT></TD></TD></TR>"
+			   tmpDetails="Expected value : '" & sExpected & " ' Actual value: ' " & sActual & " ' "
+				Reporter.ReportEvent micPass,sDescription,tmpDetails
+			ElseIf Ucase(sResult)="F" Then
+				sResult="FAIL"
+				tmpFC=tmpFC+1
+				Fail_Count=Fail_Count + 1
+				If g_Errorsnpshot <> "NULL" Then
+					sv_Open_File.writeline"<TR COLS=4 ><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2> "& sDescription &" </FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sExpected &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2> "& sActual &" </FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=100%><FONT FACE=VERDANA COLOR=RED SIZE=1><B><a href= "& g_Errorsnpshot &" target=_blank> FAIL </a></B></FONT></TD></TR>"
+					g_Errorsnpshot = "NULL"
+				Else
+					Call fn_Errsnpshot()
+					sv_Open_File.writeline"<TR COLS=4 ><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2> "& sDescription &" </FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sExpected &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2> "& sActual &" </FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=100%><FONT FACE=VERDANA COLOR=RED SIZE=1><B><a href= "& g_Failsnpshot &" target=_blank> FAIL </a></B></FONT></TD></TR>"					
+				End If				
+			   tmpDetails="Expected value : '" & sExpected & " ' Actual value: ' " & sActual & " ' "
+				Reporter.ReportEvent micFail,sDescription,tmpDetails
+			ElseIf Ucase(sResult)="I" Then
+				sResult="INFO"
+				tmpOC=tmpOC+1
+				Others_Count=Others_Count+1
+				sv_Open_File.writeline"<TR COLS=4 ><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sDescription &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sExpected &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=500><FONT FACE=VERDANA COLOR=#400000 SIZE=2>"& sActual &"</FONT></TD><TD BGCOLOR=#F5F5DC WIDTH=100%><FONT FACE=VERDANA COLOR=Black SIZE=1><B> "& sResult &" </B></FONT></TD></TR>"
+				Reporter.ReportEvent 4,sDescription,sActual
+			End If
+		End If
+		sv_Open_File.Close
+		Set sv_Fs=Nothing
+		Set sv_Open_File=Nothing
+	Else
+		Reporter.ReportEvent micWarning,"Verify whether the Report is Properly Initiated","Report is not Properly Initiated"
+	End If
+End Function
+
+'************************************************************************************************************************************************************
+'Function Name: InsTCID
+'Description : This Function Insert Test Case ID and it will create the header needed for Test Case
+'************************************************************************************************************************************************************
+Public Function InsTCID(TCID,TCDesc)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   sv_File_Name = g_File_Name
+   If RepSession=1  Then
+		Dim sv_Fs
+		Dim sv_Open_File
+		Set sv_Fs=CreateObject("Scripting.FileSystemObject")
+		Set sv_Open_File=sv_Fs.OpenTextFile(sv_File_Name,8,True)
+	
+		'Getting the Test Cases
+	   arrTCID(tmpTCCount)=TCID
+	   arrCA(tmpTCCount)=Care_Activity
+	   tmpTCCount=tmpTCCount+1
+		
+	   If tmpRepCount="" Then
+		   tmpRepCount=0
+		   tmpStartTime=Now()
+	   End If
+	   If tmpRepCount<>0 Then
+			tmpEndTime=Now()
+			If tmpOC="" Then
+				tmpOC=0
+			End If
+			If tmpPC="" Then
+				tmpPC=0
+			End If
+			If tmpFC="" Then
+				tmpFC=0
+			End If
+			tmpOC = tmpPC + tmpFC
+			sv_Open_File.writeline"<table><TR COLS=3><TD BGCOLOR=#FFE4C4 WIDTH=5%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Pass Count : "& tmpPC &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=5%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Fail Count : "& tmpFC &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=5%><FONT FACE=VERDANA COLOR=Black SIZE=1><B> Total Count : "& tmpOC &"</B></FONT></TD></TR></table>"
+			sv_Open_File.writeline"<table><TR COLS=3><TD BGCOLOR=#FFE4C4 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Start Time : "& tmpStartTime &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>End Time : "& tmpEndTime &"</B></FONT></TD><TD BGCOLOR=#FFE4C4 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=1><B>Time Taken : "& UDF_getTotalTime(tmpStartTime,tmpEndTime) &" </B></FONT></TD></TR></table>"
+			arrPC(tmpTCCount-2)=tmpPC
+			arrFC(tmpTCCount-2)=tmpFC
+			tmpFC=0
+			tmpPC=0
+			tmpOC=0
+			tmpStartTime=Now()
+	   End If
+	   If tmpVarCA=1 Then
+		   tmpCAFlag=0
+		   tmpVarCA=0
+	   End If
+	   If tmpCAFlag=2 Then
+		   tmpVarCA=tmpVarCA+1
+		Else
+			tmpCAFlag=0
+	   End If
+       'tmpCAFlag=0
+       If intCAFlag=1 and tmpTCCount<>1 Then
+				Reporter.ReportEvent 4,"Information : - ' " & Care_Activity & " ' ","Start Of  Care Activity"
+				sv_Open_File.writeline"<table><TR COLS=1><TD BGCOLOR=white WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>&nbsp;&nbsp;<DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR></Table>"
+				sv_Open_File.writeline"<Table><TR COLS=1><TD Align=Center BGCOLOR=#BC8F8F WIDTH=10%><FONT FACE=Calibri COLOR=White SIZE=3><B>Care Activity : - " & Care_Activity & "<DIV ALIGN=RIGHT></DIV></B></FONT></TD></TD></TR></Table>"
+				tmpCAFlag=1
+				intCAFlag=0
+		End If
+	   tmpRepCount=tmpRepCount+1
+	   If tmpCAFlag<>1 and tmpCAFlag<>2 Then
+			sv_Open_File.writeline"<table><TR COLS=1><TD BGCOLOR=white WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>&nbsp;&nbsp;<DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR></Table>"
+			tmpCAFlag=0
+	   End If
+		sv_Open_File.writeline"<Table><TR COLS=2><TD BGCOLOR=#FFE4E1 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Functionality Name  : "& TCID &"<DIV ALIGN=RIGHT></DIV></B></FONT></TD><TD BGCOLOR=#FFE4E1 WIDTH=10%><FONT FACE=VERDANA COLOR=Black SIZE=2><B>Functionality Desc  : "& TCDesc &"<DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR>"
+		sv_Open_File.writeline"<TABLEBORDER=0 BGCOLOR=YELLOW CELLPADDING=3 CELLSPACING=1 WIDTH=100%></Table>"	
+		sv_Open_File.writeline"<table><TR COLS=4><TD BGCOLOR=#8B0000 WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>Description</B><DIV ALIGN=RIGHT></DIV></FONT></TD><TD BGCOLOR=#8B0000 WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>Expected Result</B><DIV ALIGN=RIGHT></DIV></FONT></TD><TD BGCOLOR=#8B0000 WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>Actual Result</B><DIV ALIGN=RIGHT></DIV></FONT></TD><TD BGCOLOR=#8B0000 WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>Status</B><DIV ALIGN=RIGHT></DIV></FONT></TD></TR>"
+	   sv_Open_File.Close
+		Set sv_Fs=Nothing
+		Set sv_Open_File=Nothing
+		Reporter.ReportEvent 4,"Information : - ' " & TCID & " ' ","Start Of  Test Case"
+	Else
+		Reporter.ReportEvent micWarning,"Verify whether the Report is Properly Initiated","Report is not Properly Initiated"
+	End If
+End Function
+
+'************************************************************************************************************************************************************
+'Function Name: InsCA
+'Description : This Function Insert Care Activity Name
+'************************************************************************************************************************************************************
+Public Function InsCA(CAName)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   sv_File_Name = g_File_Name
+   If RepSession=1  Then
+	   Dim sv_Fs
+		Dim sv_Open_File
+		Set sv_Fs=CreateObject("Scripting.FileSystemObject")
+		Set sv_Open_File=sv_Fs.OpenTextFile(sv_File_Name,8,True)
+	   Care_Activity=CAName
+	   intCAFlag=1
+       If tmpTCCount=0 Then
+			Reporter.ReportEvent 4,"Information : - ' " & Care_Activity & " ' ","Start Of  Care Activity"
+			sv_Open_File.writeline"<table><TR COLS=1><TD BGCOLOR=white WIDTH=25%><FONT FACE=VERDANA COLOR=White SIZE=2><B>&nbsp;&nbsp;<DIV ALIGN=RIGHT></DIV></B></FONT></TD></TR></Table>"
+			sv_Open_File.writeline"<Table><TR COLS=1><TD Align=Center BGCOLOR=#BC8F8F WIDTH=10%><FONT FACE=Calibri COLOR=White SIZE=3><B>Care Activity : - " & Care_Activity & "</b><DIV ALIGN=RIGHT></DIV></B></FONT></TD></TD></TR></Table>"
+		    intCAFlag=0
+			tmpCAFlag=2
+	   End If
+		sv_Open_File.Close
+		Set sv_Fs=Nothing
+		Set sv_Open_File=Nothing
+	End If
+End Function
+'************************************************************************************************************************************************************
+'Function Name: UDF_getTotalTime
+'Description : This Function to get the Total Time
+'************************************************************************************************************************************************************
+Public Function UDF_getTotalTime (dtStartTime,dtEndTime)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   tmpStartTime_Temp = Split(dtStartTime," ")
+startTime= tmpStartTime_Temp(1)
+tmpEndTime_Temp = Split(dtEndTime," ")
+endTime = tmpEndTime_Temp(1)
+
+	Dim  strTimeDiff,strSec,strMins,strHrs,strTotalTimeTaken
+	strTimeDiff = DateDiff("s",CDate(startTime),CDate(endTime))
+	strSec = CInt(strTimeDiff Mod 60)
+	strMins = CInt((strTimeDiff-strSec) / 60)
+	strHrs = CInt(strMins-(strMins Mod 60)) / 60
+	strMins = CInt(strMins) Mod 60
+	
+	If (Len(strSec) < 2) Then
+			If (strSec="") Then
+				strSec = "00"
+			Else
+				strSec = "0" & strSec
+			End If
+	End If
+	If (Len(strMins) < 2) Then
+			If (strMins="") Then
+				strMins = "00"
+			Else
+				strMins = "0" & strMins
+			End If
+	End If
+	If (Len(strHrs) < 2) Then
+			If (strHrs="") Then
+				strHrs = "00"
+			Else
+				strHrs = "0" & strHrs
+			End If
+	End If
+	strTotalTimeTaken = strHrs & " Hrs" & " - " & strMins & " Min" &" - " & strSec & " Sec"
+	UDF_getTotalTime = strTotalTimeTaken
+	
+End Function
+'************************************************************************************************************************************************************
+'Function Name: fn_UpdateErrorDetails
+'Description : This Function is to Update the Error Details
+'************************************************************************************************************************************************************
+Public Function fn_UpdateErrorDetails (pramScenario,pramError_Description,pramScript_Error_Message,pramFunction_Name,pramTakeSnapShot,pramExitAction,pramErrorNumber,pramIgnoreErrorNumber)
+If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+pramErrorTemplatePath = g_ErrorSheetPathVal
+If pramErrorNumber <> 0 or pramIgnoreErrorNumber = "Y"  Then
+pramTester_ID = ENVIRONMENT.Value("UserName")
+pramMachine_Name = ENVIRONMENT.Value("LocalHostName")
+pramTime_Stamp = fn_GetDateTime()
+pramErrorTemplatePathMain = pramErrorTemplatePath & "\Error_Details.xls"
+If pramTakeSnapShot = "Y" Then
+pramScreenshot_Path =  pramErrorTemplatePath & "\Error_Snapshot\"
+pramScenario_Temp = Split(pramScenario," - ")
+sv_pramScenario = pramScenario_Temp(0) & "-" & pramScenario_Temp(1)
+pramScreenshot_Path = pramScreenshot_Path & sv_pramScenario & "_" & pramTime_Stamp & ".png"
+desktop.CaptureBitmap pramScreenshot_Path
+pramScreenshot_Path = "file:///"&pramScreenshot_Path
+g_Errorsnpshot = pramScreenshot_Path
+Else
+pramScreenshot_Path = "N/A"
+End If
+If pramScript_Error_Message <> ""  Then
+	If instr(1,pramScript_Error_Message,"$",1)<> 0 Then
+		pramScript_Error_Message = Replace(pramScript_Error_Message,"$","",1)
+	End If
+	If instr(1,pramScript_Error_Message,"'",1)<> 0 Then
+		pramScript_Error_Message = Replace(pramScript_Error_Message,"'","''")
+	End If
+End If
+fn_InsertQueryErrorSheet pramErrorTemplatePathMain,pramScenario,pramError_Description,pramScript_Error_Message,pramFunction_Name,pramScreenshot_Path,pramTime_Stamp,pramMachine_Name,pramTester_ID,"Not Fixed"
+If ucase(pramExitAction) = "Y" Then
+ExitAction
+End If
+End If
+End Function
+'************************************************************************************************************************************************************
+'Function Name: fn_InsertQueryErrorSheet
+'Description : This Function is to insert the Error in the Error Report
+'************************************************************************************************************************************************************
+Public Function fn_InsertQueryErrorSheet (pramErrorTemplatePath,pramScenario,pramError_Description,pramScript_Error_Message,pramFunction_Name,pramScreenshot_Path,pramTime_Stamp,pramMachine_Name,pramTester_ID,pramFix_Status)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Dim oADO, oRS
+	Dim sOutput
+	Dim aZIPs,i, sZIP
+	Set oADO = CreateObject("ADODB.Connection")
+	sv_strDataFile1 =  pramErrorTemplatePath
+	sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+	oADO.Open  sv_strConnection1
+	sSQL =  "INSERT INTO [Error_Details$]  (Scenario,Error_Description,Script_Error_Message,Function_Name,Screenshot_Path,Time_Stamp,Machine_Name,Tester_ID,Fix_Status) VALUES ('" & pramScenario &"','" & pramError_Description &"','" & pramScript_Error_Message &"','" & pramFunction_Name &"','" & pramScreenshot_Path &"','" & pramTime_Stamp &"','" & pramMachine_Name &"','" & pramTester_ID &"','" & pramFix_Status &"')"
+	Set oRS = oADO.Execute(sSQL)
+	Set oRS = Nothing
+	oADO.Close
+	Set oADO = Nothing
+End Function 
+'************************************************************************************************************************************************************
+'Function Name: fn_CheckFunctionError
+'Description : This Function to get if the Function Error
+'************************************************************************************************************************************************************
+Public Function fn_CheckFunctionError(pramErrorString)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If pramErrorString= "FunctionError" Then
+	   ExitAction
+   End If
+End Function
+'************************************************************************************************************************************************************
+'Function Name: fn_CheckFileExist
+'Description : This Function to Check for the File Exist
+'************************************************************************************************************************************************************
+Public Function fn_CheckFileExist (strFilePathSource)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+  Wait(2)
+dim filesys
+Set filesys = CreateObject("Scripting.FileSystemObject")
+If filesys.FileExists(strFilePathSource) Then
+       fn_CheckFileExist = "Pass"
+	Else
+	   fn_CheckFileExist = "Fail"
+      
+End If 
+End Function
+'************************************************************************************************************************************************************
+'Function Name: fn_GetDateTime
+'Description : This Function to get Date Time for the Snapshot
+'************************************************************************************************************************************************************
+Public function fn_GetDateTime()
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	UDF_str_AppendDateTime =  ""
+	UDF_str_AppendDateTime = Day(Now) & "-" & MonthName(Month(Now),True) & "-" & Year(Now) & "_" & Hour(Now) & "-" & Minute(Now) & "-" & Second(Now)
+	fn_GetDateTime = UDF_str_AppendDateTime
+End Function
+'************************************************************************************************************************************************************
+'Function Name: DetailsUpdate
+'Description : This Function to Update Details
+'************************************************************************************************************************************************************
+Public Function DetailsUpdate(ScriptID,ScriptName,StartTime,EndTime,Desc)
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+'======================================get user name======================
+strComputer = "."
+Set objWMIService = GetObject("winmgmts:" _
+    & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2") 
+Set colComputer = objWMIService.ExecQuery _
+    ("Select * from Win32_ComputerSystem")
+For Each objComputer in colComputer
+   UserName =  objComputer.UserName
+Next
+'======================================get machine name======================
+set wshnetwork=createobject("wscript.network")
+MachineName=wshnetwork.computername
+set wshnetwork=nothing
+'=====================================Get Total Time==========================
+TotalTime = UDF_getTotalTime1(StartTime,EndTime)
+sv_Date = Date
+'Test Environment
+	TEnvironment = g_strEnvironment
+	TotalRecords = g_TotalCount
+	TotalRecordsExecuted = g_ExecCount
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Dim sv_objConnAdCn, sv_strDataFile, sv_strConnection
+	Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+	sv_strConnection="Provider=SQLOLEDB;Data Source=CAEvQACOE01;Integrated Security=SSPI;Initial Catalog=UNUMECDB;"
+	sv_objConnAdCn.Open sv_strConnection
+
+	strsql = "Insert into DetailsOfExecution(ScriptID,ScriptName,Environment,ExecutedBy,MachineIP,Date,TotalTime,StartTime,EndTime,TotalRecords,TotalRecordsExecuted,Description) Values('" & ScriptID & "','" & ScriptName & "','" & TEnvironment & "','" & UserName & "','" & MachineName & "','" & sv_Date & "','" & TotalTime & "','" & StartTime & "','" & EndTime & "','" & TotalRecords & "','" & TotalRecordsExecuted & "','" & Desc & "')"
+	sv_objConnAdCn.Execute (strsql)
+	
+	sv_objConnAdCn.close
+	Set sv_objConnAdCn = Nothing
+End Function
+'************************************************************************************************************************************************************
+'Function Name: UDF_getTotalTime1
+'Description : This Function to get Total  Time
+'************************************************************************************************************************************************************
+Public Function UDF_getTotalTime1(ByVal startTime, ByVal endTime)
+If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+        Dim strTimeDiff, strSec, strMins, strHrs, strTotalTimeTaken
+        strTimeDiff = DateDiff("s", CDate(startTime), CDate(endTime))
+        strSec = CInt(strTimeDiff Mod 60)
+        strMins = CInt((strTimeDiff - strSec) / 60)
+        strHrs = CInt(strMins - (strMins Mod 60)) / 60
+        strMins = CInt(strMins) Mod 60
+
+        If (Len(strSec) < 2) Then
+            If (strSec = "") Then
+                strSec = "00"
+            Else
+                strSec = "0" & strSec
+            End If
+        End If
+        If (Len(strMins) < 2) Then
+            If (strMins = "") Then
+                strMins = "00"
+            Else
+                strMins = "0" & strMins
+            End If
+        End If
+        If (Len(strHrs) < 2) Then
+            If (strHrs = "") Then
+                strHrs = "00"
+            Else
+                strHrs = "0" & strHrs
+            End If
+        End If
+        strTotalTimeTaken = strHrs & ":" & strMins & ":" & strSec
+        UDF_getTotalTime1= strTotalTimeTaken
+    End Function
+'************************************************************************************************************************************************************
+'Function Name: fn_SendEmailforDBUpdate
+'Description : This Function to Send mail 
+'************************************************************************************************************************************************************
+Public Function fn_SendEmailforDBUpdate(ToList,UserName,Subject,Message)
+If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+Dim objOutlook_Os 'As Object
+	Dim objOutlookMsg_Os 'As Object
+	Set objOutlook_Os = CreateObject("Outlook.Application")
+	Set objOutlookMsg_Os = objOutlook_Os.CreateItem(0)
+	With objOutlookMsg_Os
+		  '  .SentOnBehalfOfName = "QACoEAutomationTeam@unum.com"
+		    .To = ToList
+            .Subject = Subject
+			.Body = Message
+'			.HTMLBody = "HTML version of message"
+ '   		.HTMLBody = Message
+'			.Attachments.Add ("c:\Sending_Mail.txt")
+			.Send 'Let´s go!
+	End With			
+	Set objOutlookMsg_Os = Nothing
+	Set objOutlook_Os = Nothing
+
+End Function
+'************************************************************************************************************************************************************
+'Function Name: fn_InsertQueryErrorSheet
+'Description : This Function is to insert the Error in the Error Report
+'************************************************************************************************************************************************************
+Public Function fn_UpdateStatus()
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Dim oADO, oRS
+	Dim sOutput
+	Dim aZIPs,i, sZIP
+	Set oADO = CreateObject("ADODB.Connection")
+	sv_strDataFile1 =   g_strInputPath & "\INPUT.xls"
+	sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+	oADO.Open  sv_strConnection1
+	sSQL =  "UPDATE [USERINPUT$] SET STATUS = 'COMPLETED' WHERE Ucase(SCENARIO) = '" & g_Scenario  &"'"
+	Set oRS = oADO.Execute(sSQL)
+	Set oRS = Nothing
+	oADO.Close
+	Set oADO = Nothing
+End Function 
+'************************************************************************************************************************************************************
+'Function Name: fn_Errsnpshot
+'Description : This Function is to get the snapshot of the Failed condition
+'************************************************************************************************************************************************************
+Public Function fn_Errsnpshot()
+If  UCase(g_HandleError) = "YES" Then
+On Error resume next 
+End If
+pramScreenshot_Path =  g_ErrorSheetPathVal & "\Error_Snapshot\"
+pramScenario = g_Scenario & "-" & g_fnName
+pramTime_Stamp = fn_GetDateTime()
+pramScreenshot_Path = pramScreenshot_Path & pramScenario & "_" & pramTime_Stamp & ".png"
+desktop.CaptureBitmap pramScreenshot_Path
+pramScreenshot_Path = "file:///"&pramScreenshot_Path
+
+sv_SharePath_Perc=split(pramScreenshot_Path, " ")
+sv_ubound = ubound(sv_SharePath_Perc)
+sv_Failsnpshot = sv_SharePath_Perc(0)
+For i = 1 to sv_ubound
+	sv_Failsnpshot = sv_Failsnpshot & "%20" & sv_SharePath_Perc(i)
+Next
+
+g_Failsnpshot = sv_Failsnpshot
+
+End Function
+'************************************************************************************************************************************************************

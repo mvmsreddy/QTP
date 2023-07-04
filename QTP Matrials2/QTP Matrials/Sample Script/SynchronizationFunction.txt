@@ -1,0 +1,31 @@
+'---------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - Used For Browser Sync - Waits till Browser status updates as NOT BUSY
+'StrBrw - Browser Name in OR,strWaitTime - TIme to wait in Seconds
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+Function fg_SyncWithBrowser(strBrw,strWaitTime)
+For i = 0 to strWaitTime
+strStatus = Browser(strBrw).Object.Busy
+If not strStatus Then
+Exit Function
+End If
+Next
+Wait(1)
+End Function
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+'---------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - Used For Terminal Emulator Sync - Waits till TE Emulator status updates as Ready
+'strTE - TE Window Name in OR
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+Function Fn_SyncTeScreen(strTE)
+strStatus=Null
+wait(2)
+strStatus = Trim (Tewindow(strTE).GetROProperty("emulator status"))
+Do until strStatus="Ready"
+Wait(2)
+strStatus = trim (Tewindow(strTE).GetROProperty("emulator status"))
+Loop
+End Function
+'---------------------------------------------------------------------------------------------------------------------------------------

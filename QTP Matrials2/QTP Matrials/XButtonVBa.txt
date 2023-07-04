@@ -1,0 +1,8 @@
+Private Sub UserForm_QueryClose(Cancel As Integer, CloseMode As Integer)
+
+    If CloseMode = 0 Then
+        Cancel = True
+        MsgBox "The X is disabled, please use the Close Command Button.", vbCritical
+    End If
+    
+End Sub

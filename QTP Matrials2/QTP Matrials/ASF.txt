@@ -1,0 +1,29 @@
+g_ActionName = Environment("ActionName")
+If  UCase(g_HandleError) = "YES" Then
+	On Error resume next 
+    RunAction "Select_Function", oneIteration
+	sv_Funname = g_Scenario & " - " & g_fnName
+	fn_UpdateErrorDetails  sv_Funname,"Error In Function - " & g_fnName,Err.description,g_ActionName,"Y","N",Err.Number,""
+	If Err.Number <> 0 or g_ErrNumber <> 0  Then
+		g_ErrNumber = 0
+		Call WriteReport(Err.description,"Error while executing the Function " & g_fnName,"Navigate to Error Log for more Details","F")
+		SystemUtil.CloseProcessByName("Unum.Benefits.NavilinkUI.exe")
+		SystemUtil.CloseProcessByName("Unum.Enterprise.ImageServices.OnScreenLoader.exe")
+		wait(15)
+		If UCASE(g_strEnvironment) = "ITEST1"  Then
+			Systemutil.Run g_strIservicesITEST1Path
+		Elseif UCASE(g_strEnvironment) = "UA"  Then
+			Systemutil.Run g_strIservicesUAPath
+		End If
+		wait(10)
+		Call SyncWind()
+		If Browser("Brw_NavilinkLoad").Dialog("DLog_NavilinkLoad").WinButton("WBtn_Yes").Exist(10) Then
+			Browser("Brw_NavilinkLoad").Dialog("DLog_NavilinkLoad").WinButton("WBtn_Yes").Click
+		End If
+		wait(10)
+	End If
+	On error goto 0 
+Else
+	RunAction "Select_Function", oneIteration
+End If 
+''================================================================================================================

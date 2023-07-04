@@ -1,0 +1,17 @@
+
+Function fn_InsertQuerySSNStatus (pramPath,pramSheetName,sv_SSNComment)
+pramColNameOne = "SSN"
+pramColNameTwo = "Status"
+pramColNameThree = "Error_Message"
+Dim oADO, oRS
+Dim sOutput
+Dim aZIPs,i, sZIP
+Set oADO = CreateObject("ADODB.Connection")
+sv_strDataFile1 =  pramPath
+sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+oADO.Open  sv_strConnection1
+sSQL =  "INSERT INTO ["&pramSheetName&"$]  ("&pramColNameOne&"," & pramColNameTwo &"," & pramColNameThree &") Select  SSN,Status,Error_Message from [SSN_Status$] WHERE UCASE(Status) = '"&sv_SSNComment&"'"
+             Set oRS = oADO.Execute(sSQL)
+            Set oRS = Nothing
+			Set oADO = Nothing
+End Function

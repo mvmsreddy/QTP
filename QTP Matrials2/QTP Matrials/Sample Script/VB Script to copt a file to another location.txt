@@ -1,0 +1,9 @@
+ Copy Code 
+Dim fso, MyFile
+Set fso = CreateObject("Scripting.FileSystemObject")
+Set MyFile = fso.CreateTextFile("c:\testfile.txt", True)
+MyFile.WriteLine("This is a test.")
+MyFile.Close
+Set MyFile = fso.GetFile("c:\testfile.txt")
+MyFile.Copy ("c:\windows\desktop\test2.txt")
+ 

@@ -1,0 +1,27 @@
+'---------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - To Delete File 
+'Paramater - strFilePath (Path Of the file that needs to be deleted eg - "C:\Doc.xls"
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+Function fg_DeleteFile(strFilePath)
+	dim filesys
+	Set filesys = CreateObject("Scripting.FileSystemObject") 
+	If filesys.FileExists(strFilePath) Then
+		   filesys.DeleteFile strFilePath 
+	End If 
+End Function
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+'---------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - To Copy File from one Location To Another  
+'Paramater - strFilePathSource (Path Of the file that needs to be copied),strFilePathDestination (New Location Of the file)
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+Function fg_CopyFile (strFilePathSource,strFilePathDestination)
+		dim filesys
+		Set filesys = CreateObject("Scripting.FileSystemObject")
+		If filesys.FileExists(strFilePathSource) Then
+      			filesys.CopyFile strFilePathSource, strFilePathDestination,True
+		End If 
+
+End Function

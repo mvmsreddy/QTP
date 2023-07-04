@@ -1,0 +1,1418 @@
+'=================================================================================
+'Function Name : fn_GetDateTime
+'Description : Returns current date in format - Date - Month - Year - Time.(This return value can be appended to names of output files in order to make them unique).
+'Input Parameter : None
+'Return Value = Date in specified format
+'=================================================================================
+Function fn_GetDateTime()
+	UDF_str_AppendDateTime =  ""
+	UDF_str_AppendDateTime = Day(Now) & "-" & MonthName(Month(Now),True) & "-" & Year(Now) & "_" & Hour(Now) & "-" & Minute(Now) & "-" & Second(Now)
+	fn_GetDateTime = UDF_str_AppendDateTime
+End Function
+
+'=================================================================================
+'Function Name : fn_CheckFileExist 
+'Description : Function can be used to verify if a specified file exists or not
+'Input Parameter : Location of file whose existance needs to be checked (Eg C:\QTPScripts\Input.xls)
+'Return Value = Returns "Pass" - if file is found else "False"
+'=================================================================================
+Function fn_CheckFileExist (pramFilePathSource)
+  Dim filesys
+Set filesys = CreateObject("Scripting.FileSystemObject")
+If filesys.FileExists(pramFilePathSource) Then
+       fn_CheckFileExist = "Pass"
+	Else
+	   fn_CheckFileExist = "Fail"
+      
+End If 
+End Function
+
+'=================================================================================
+'Function Name : fn_SendEmail
+'Description : Function can be used to send outlook mail (on behalf of a particular mail id from a different mailbox id)
+'Input Parameter : pramMailID - List of mail ids to whom mail is to be sent
+'pramUserName - On Behalf of Mail Box,pramSubject,pramMessage - Specifics to be mentioned in Subject line and mail body
+'Return Value = None
+'=================================================================================
+
+Function fn_SendEmail(pramSubject,pramMessage,pramMailID,pramUserName)
+
+		Dim oMsg 
+		Dim oConf
+		Dim Flds
+		
+		Set oMsg = CreateObject("CDO.Message")
+		set oConf = CreateObject("CDO.Configuration")
+		Set Flds = oConf.Fields
+		
+		With Flds
+			.Item ("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
+			.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserver") = "mail.unum.com"
+			.Item ("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25 
+			.Update
+		End With
+		
+		With oMsg
+			.Configuration = oConf
+			.To = pramMailID'"kreddy@unum.com"
+			.From = pramUserName'"QACoEAutomationTeam@unum.com"
+			.Subject = pramSubject
+			.HTMLBody = pramMessage
+			.Send
+		End With
+
+		Set oMsg = Nothing
+		Set oConf = Nothing
+		Set Flds = Nothing
+End Function
+
+'=================================================================================
+'Function Name : fn_GetTotalTime 
+'Description : Function can be used to return the time difference in format - Date/Min/Hours
+'Input Parameter : pramstartTime - Start Time,pramendTime - End Time
+'Return Value = Returns the difference between the start time and end time
+'=================================================================================
+
+Public Function fn_GetTotalTime (ByVal pramstartTime, ByVal pramendTime)
+        Dim strTimeDiff, strSec, strMins, strHrs, strTotalTimeTaken
+        strTimeDiff = DateDiff("s", CDate(pramstartTime), CDate(pramendTime))
+        strSec = CInt(strTimeDiff Mod 60)
+        strMins = CInt((strTimeDiff - strSec) / 60)
+        strHrs = CInt(strMins - (strMins Mod 60)) / 60
+        strMins = CInt(strMins) Mod 60
+
+        If (Len(strSec) < 2) Then
+            If (strSec = "") Then
+                strSec = "00"
+            Else
+                strSec = "0" & strSec
+            End If
+        End If
+        If (Len(strMins) < 2) Then
+            If (strMins = "") Then
+                strMins = "00"
+            Else
+                strMins = "0" & strMins
+            End If
+        End If
+        If (Len(strHrs) < 2) Then
+            If (strHrs = "") Then
+                strHrs = "00"
+            Else
+                strHrs = "0" & strHrs
+            End If
+        End If
+        strTotalTimeTaken = strHrs & ":" & strMins & ":" & strSec
+        fn_GetTotalTime = strTotalTimeTaken
+    End Function
+
+'=================================================================================
+'Function Name : fn_ClearExcel
+'Description : Function can be used to clear an excel sheet before start of execution
+'Input Parameter : pramFilePath - Full path of excel which is to be cleared,
+'pramSheetName - Name of sheet which is to be cleared,pramStartColumn - Column from which clearing needs to be done
+'Return Value = None
+'=================================================================================
+Function fn_ClearExcel (pramFilePath,pramSheetName,pramStartColumn)
+Dim xlApp
+Dim xlBook
+Dim xlSheet
+Set xlApp = CreateObject("Excel.Application")
+Set xlBook = xlApp.Workbooks.Open(pramFilePath)
+Set xlSheet = xlBook.Worksheets(pramSheetName)
+xlapp.visible = False 'For debug purposes, show the Excel window
+xlsheet.range(""&pramStartColumn&":IV65536").Delete 
+xlBook.save
+xlBook.Close False
+xlApp.quit
+End Function
+
+
+
+
+'=================================================================================
+'Function Name : fn_TriggerMacro
+'Description : Function can be used to trigger an excel macro(Not on a seperate excel sheet)
+'Input Parameter : g_strMainPath - Full path of excel which contains macro,
+'pramMacroName - Name of macro that is to be triggered Eg - "DBC_Macro.xls!Compare" where Compare is sub name locatied in excel DBC_Macro.xls
+'Return Value = None
+'=================================================================================
+
+Public Function fn_TriggerMacro(g_strMainPath,pramMacroName)
+Set objExcel = CreateObject("Excel.Application")
+objExcel.Visible = False
+'Set objWorkbook1 = objExcel.Workbooks.Open (g_strMainPath & "\Library\DBC_Macro.xls")
+Set objWorkbook1 = objExcel.Workbooks.Open (g_strMainPath)
+'objWorkbook.Application.Run("DBC_Macro.xls!Compare")' filename, macro method name 
+objWorkbook1.Application.Run(pramMacroName)' filename, macro method name 
+'objWorkbook1.Close false 
+objWorkbook1.Save
+'wait(2)
+objWorkbook1.Close 
+objExcel.Quit
+'Wait(2)
+End Function
+
+
+
+'=================================================================================
+'Function Name : fn_TriggerMacroDiffExcel
+'Description : Function can be used to trigger an excel macro(On a seperate excel sheet)
+'Input Parameter : sv_SourcePath - Full path of excel which contains macro,
+'sv_DestPath - Full path of excel on which the macro is to be triggered,
+'pramMacroName - Name of macro that is to be triggered Eg - "DBC_Macro.xls!Compare" where Compare is sub name locatied in excel DBC_Macro.xls
+'Return Value = None
+'=================================================================================
+
+
+Function fn_TriggerMacroDiffExcel(sv_SourcePath,sv_DestPath,pramMacroName)
+  'sv_SourcePath = g_strMainPath & "\Data\Macro\NSU_Macro.xls"
+	'sv_DestPath = g_strMainPath & "\Data\Macro\PMR_Results.xls"
+	Set objExcel = CreateObject("Excel.Application")
+	objExcel.Visible = False
+	Set objWorkbook1 = objExcel.Workbooks.Open(sv_SourcePath)
+	Set objWorkbook = objExcel.Workbooks.Open(sv_DestPath)
+	'objWorkbook.Application.Run("NSU_Macro.xls!ClearSheet")
+	objWorkbook.Application.Run(pramMacroName)
+	objWorkbook1.Close 
+	objExcel.DISPLAYALERTS = FALSE 
+	objExcel.Save 
+	objWorkbook.Close
+End Function	
+
+
+'=================================================================================
+'Function Name : fn_CopyFile
+'Description : Function can be used to copy file from one location to another
+'Input Parameter : pramFilePathSource - Full path of source file,
+'sv_DestPath - Full path of destination file,
+'Return Value = None
+'=================================================================================
+
+
+Function fn_CopyFile (pramFilePathSource,pramFilePathDestination)
+dim filesys
+Set filesys = CreateObject("Scripting.FileSystemObject")
+If filesys.FileExists(pramFilePathSource) Then
+       filesys.CopyFile pramFilePathSource, pramFilePathDestination,True
+End If 
+End Function
+
+'=================================================================================
+'Function Name : fn_InsertQuery 
+'Description : Function can be used to insert one value into a specified excel column
+'Input Parameter : pramPath - Full path of excel sheet into which data needs to be updated
+'pramSheetName - Excel Sheet name,pramColName - excel column name,pramValue - Value that needs to be inserted
+'Return Value = None
+'=================================================================================
+
+Function fn_InsertQuery (pramPath,pramSheetName,pramColName,pramValue)
+Dim oADO, oRS
+Dim sOutput
+Dim aZIPs,i, sZIP
+Set oADO = CreateObject("ADODB.Connection")
+sv_strDataFile1 =  pramPath
+sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+oADO.Open  sv_strConnection1
+sSQL =  "INSERT INTO ["&pramSheetName&"$]  ("&pramColName&") VALUES ('" & pramValue &"')"
+             Set oRS = oADO.Execute(sSQL)
+            
+             'Set oRS = Nothing
+Set oADO = Nothing
+End Function 
+
+'=================================================================================
+'Function Name : fn_InsertQueryMulti 
+'Description : Function can be used to insert values into multiple (Two in this case - parameterize accordingly for multiple values) excel column
+'Input Parameter : pramPath - Full path of excel sheet into which data needs to be updated
+'pramSheetName - Excel Sheet name,pramColNameOne - excel column name,pramValueOne - Value that needs to be inserted in column one
+'Return Value = None
+'=================================================================================
+
+Function fn_InsertQueryMulti (pramPath,pramSheetName,pramColNameOne,pramValueOne,pramColNameTwo,pramValueTwo)
+Dim oADO, oRS
+Dim sOutput
+Dim aZIPs,i, sZIP
+Set oADO = CreateObject("ADODB.Connection")
+sv_strDataFile1 =  pramPath
+sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+oADO.Open  sv_strConnection1
+sSQL =  "INSERT INTO ["&pramSheetName&"$]  ("&pramColNameOne&"," & pramColNameTwo &") VALUES ('" & pramValueOne &"','" & pramValueTwo &"')"
+'sSQL =  "INSERT INTO [Input$]  (Employee_Name,Employee_SSN,Employee_DOB,To_Be_Registered,Registration_Status,Employee_Phone,Employee_Email) VALUES ('" & strEEName &"','" & strSSN &"','" & strDOB &"','" & strToBeRegistered &"','" & strRegisterationStatus &"','" & sv_Employee_Phone &"','" & sv_Employee_Email &"')"
+             Set oRS = oADO.Execute(sSQL)
+            
+             'Set oRS = Nothing
+Set oADO = Nothing
+End Function 
+
+'=================================================================================
+'Function Name : fn_CloseBrowser 
+'Description : Function can be used to close all open browser anddialog boxes (Usually at start and end of execution)
+'Input Parameter : None
+'Return Value = Returns - "Function Error" in case of error closing Browsers
+'=================================================================================
+
+Public Function fn_CloseBrowser ()
+  On Error Resume Next
+set oDesc = Description.Create() 
+oDesc("micclass").Value = "Browser" 
+set dDesc = Description.Create() 
+dDesc("micclass").Value = "Dialog"
+set wDesc = Description.Create() 
+wDesc("micclass").Value = "Window" 
+
+'Close All Open Dialogs
+Set dChild = Desktop.ChildObjects(dDesc)
+dCount = dChild.count
+If dCount > 0  Then
+For dInd =  0 to dCount -1
+    dChild(dInd).Close
+Next
+End If  
+
+'Close All Open Explorer Windows
+Set wChild = Desktop.ChildObjects(wDesc)
+wCount = wChild.count
+If wCount > 0  Then
+For dInd =  0 to wCount -1
+    wClass = wChild(dInd).getroproperty("regexpwndclass")
+   If  instr(1,wClass,"Internet Explorer",1) <> 0 Then
+      wChild(dInd).Close
+	End If
+Next
+End If  
+
+'Close All Open Browsers
+Set oChild = Desktop.ChildObjects(oDesc)
+iCount = oChild.count
+If iCount > 0  Then
+For Ind =   0 to iCount -1 
+      Set bdChild = oChild(Ind).ChildObjects(dDesc)
+          bdCount = bdChild.count
+If bdCount > 0  Then
+      bdChild(0).Close
+End If	
+         oChild(Ind).Close
+Next
+End If
+fn_UpdateErrorDetails  "N/A","Unable to initilize system.",Err.description,"fn_CloseOpenExcel","","Y",Err.Number,""
+If err.number <> 0  Then
+     fn_CloseBrowser = "FunctionError"
+	Exit Function
+End If
+End Function
+
+'=================================================================================
+'Function Name : fn_VerifyBrowserTitle 
+'Description : Function can be used to verify if browser with a specified title is open)
+'Input Parameter : pram_Title - Expected browser title
+'Return Value = Returns - "Pass" if browser with specified title is found.Else string - "Fail" is returned
+'=================================================================================
+
+Public Function fn_VerifyBrowserTitle (pram_Title)
+oFlag = False
+set oDesc = Description.Create() 
+oDesc("micclass").Value = "Browser" 
+Set oChild = Desktop.ChildObjects(oDesc)
+iCount = oChild.count
+If iCount > 0  Then
+For Ind = 0 to iCount -1 
+       g_BrowserName =  trim(oChild(Ind).getroproperty("Title"))
+	   If  g_BrowserName = pram_Title Then
+		    oFlag = True
+	      
+			  Exit for
+	   End If
+Next
+End If
+If  oFlag Then
+     fn_VerifyBrowserTitle = "Pass"
+Else
+      fn_VerifyBrowserTitle = "Fail"	 
+End If
+
+End Function
+
+'=================================================================================
+'Function Name : fn_SyncWithBrowser
+'Description : Function can be used sync with browser - Waits till browser status is not busy
+'Input Parameter : pram_Title - Expected browser title
+'Return Value = Returns - "Pass" if browser with specified title is found.Else string - "Fail" is returned
+'=================================================================================
+Function fn_SyncWithBrowser (pramWaitTime,pram_BrwTitle)
+set oDesc = Description.Create() 
+oDesc("micclass").Value = "Browser" 
+oDesc("title").Value = pram_BrwTitle
+Set oChild = Desktop.ChildObjects(oDesc)
+oChildCount = oChild.count
+If  oChildCount = 1Then
+For i = 0 to pramWaitTime
+strStatus = Browser(oDesc).Object.Busy
+If not strStatus Then
+Exit Function
+End If
+Wait(1)
+Next
+End If
+End Function
+
+'=================================================================================
+'Function Name : fn_CheckWebElement
+'Description : Function can be used to verify if web element with specified innertext appears on a page
+'Input Parameter : pram_BrwName - the browser name (as it appears in the object repository),pram_PgName - the Page name (as it appears in the object repository),pram_innerText - Expected web element innertext value
+'Return Value = Returns - "True" if web element with specified innertext is found.Else string - "False" is returned
+'=================================================================================
+Function fn_CheckWebElement (pram_BrwName,pram_PgName,pram_innerText)
+   strChildExist = "False"
+set oDesc = Description.Create() 
+oDesc("micclass").Value = "WebElement" 
+oDesc("innertext").Value = pram_innerText
+If Browser(pram_BrwName).Page(pram_PgName).Exist(2) Then
+Set oChild = Browser(pram_BrwName).Page(pram_PgName).ChildObjects(oDesc)
+oChildCount = oChild.count
+If  oChildCount >= 1Then
+   strChildExist = "True"
+End If
+End If
+  fn_CheckWebElement = strChildExist
+End Function
+
+'=================================================================================
+'Function Name : fn_UpdateErrorDetails 
+'Description : Function can be used to update unexpected script error details into the error sheet.
+'Dependencies: 1) Error Sheet Must be present(Ref : Sample Error Sheet) 2) Must be used along with function - fn_InsertQueryErrorSheet 3) Suite Must have Error_Snapshot Folder within the result folder
+'Input Parameter :pramScenario - Scenario in which error occured,pramError_Description - Brief Description of error (user defined),
+'pramScript_Error_Message - Error message generated by QTP,pramFunction_Name - "Name of function in which error occured",pramTakeSnapShot -'Y' or 'N' - if 'Y' an error snapshot will be taken and placed in error_Snapshot folder,
+'pramExitAction ,pramErrorNumber - A none zero number that will be generated in case of any run time errore,pramIgnoreErrorNumber - 'Y'  if an error is to be logged even no error is generated by QTP
+'Return Value: None
+'Sample Function Call : fn_UpdateErrorDetails  "N/A","Error In Configuration File",Err.description,g_ActionName,"","Y",Err.Number,""
+'=================================================================================
+Function fn_UpdateErrorDetails (pramScenario,pramError_Description,pramScript_Error_Message,pramFunction_Name,pramTakeSnapShot,pramExitAction,pramErrorNumber,pramIgnoreErrorNumber)
+pramErrorTemplatePath = Environment.Value("pramErrorSheetPath")
+If pramErrorNumber <> 0 or pramIgnoreErrorNumber = "Y"  Then
+pramTester_ID = ENVIRONMENT.Value("UserName")
+pramMachine_Name = ENVIRONMENT.Value("LocalHostName")
+pramTime_Stamp = fn_GetDateTime()
+pramErrorTemplatePathMain = pramErrorTemplatePath & "\Error_Details.xls"
+If pramTakeSnapShot = "Y" Then
+pramScreenshot_Path =  pramErrorTemplatePath & "\Error_Snapshot\"
+pramScreenshot_Path = pramScreenshot_Path & pramScenario & "_" & pramTime_Stamp & ".png"
+desktop.CaptureBitmap pramScreenshot_Path
+pramScreenshot_Path = "file:///"&pramScreenshot_Path
+Else
+pramScreenshot_Path = "N/A"
+End If
+If pramScript_Error_Message <> ""  Then
+	If instr(1,pramScript_Error_Message,"$",1)<> 0 Then
+		pramScript_Error_Message = Replace(pramScript_Error_Message,"$","",1)
+	End If
+	If instr(1,pramScript_Error_Message,"'",1)<> 0 Then
+		pramScript_Error_Message = Replace(pramScript_Error_Message,"'","''")
+	End If
+End If
+fn_InsertQueryErrorSheet pramErrorTemplatePathMain,pramScenario,pramError_Description,pramScript_Error_Message,pramFunction_Name,pramScreenshot_Path,pramTime_Stamp,pramMachine_Name,pramTester_ID,"Not Fixed"
+If ucase(pramExitAction) = "Y" Then
+ExitAction
+End If
+End If
+End Function
+
+'=================================================================================
+'Function Name : fn_InsertQueryErrorSheet 
+'Description : Function can be used to insert data into the error sheet
+'Dependencies: 1) Error Sheet Must be present(Ref : Sample Error Sheet) 2) Must be used along with function - fn_InsertQueryErrorSheet 3) Suite Must have Error_Snapshot Folder within the result folder
+'Input Parameter : pramErrorTemplatePath - Error Sheet Location,pramScenario - Scenario in which error occured,pramError_Description - Brief Description of error (user defined),
+'pramScript_Error_Message - Error message generated by QTP,pramFunction_Name - "Name of function in which error occured",
+'Refer function fn_UpdateErrorDetails  for details of other input variable 
+'Return Value: None
+'=================================================================================
+
+Function fn_InsertQueryErrorSheet (pramErrorTemplatePath,pramScenario,pramError_Description,pramScript_Error_Message,pramFunction_Name,pramScreenshot_Path,pramTime_Stamp,pramMachine_Name,pramTester_ID,pramFix_Status)
+Dim oADO, oRS
+Dim sOutput
+Dim aZIPs,i, sZIP
+Set oADO = CreateObject("ADODB.Connection")
+sv_strDataFile1 =  pramErrorTemplatePath
+sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+oADO.Open  sv_strConnection1
+sSQL =  "INSERT INTO [Error_Details$]  (Scenario,Error_Description,Script_Error_Message,Function_Name,Screenshot_Path,Time_Stamp,Machine_Name,Tester_ID,Fix_Status) VALUES ('" & pramScenario &"','" & pramError_Description &"','" & pramScript_Error_Message &"','" & pramFunction_Name &"','" & pramScreenshot_Path &"','" & pramTime_Stamp &"','" & pramMachine_Name &"','" & pramTester_ID &"','" & pramFix_Status &"')"
+             Set oRS = oADO.Execute(sSQL)
+			 ''Wait(3)
+			 'oRS.Close
+             Set oRS = Nothing
+			
+			oADO.Close
+Set oADO = Nothing
+'Wait(3)
+End Function 
+
+'=================================================================================
+'Function Name : fn_GetTheCount 
+'Description : Function can be used to retrieve the number of used rows in an excel sheet.
+'Input Parameter : pramInputSheetPath - Complete path of the excel,sv_SheetName - Name of the excel sheet
+'Return Value: Returns the countr of used rows in a sheet
+'=================================================================================
+
+Function fn_GetTheCount (pramInputSheetPath,sv_SheetName)
+Set sv_objConnAdCn3 = CreateObject("ADODB.Connection")
+								sv_strDataFile3 =  pramInputSheetPath
+								sv_strConnection3="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile3 & ";ReadOnly=True;"
+								sv_objConnAdCn3.Open sv_strConnection3
+							  sv_strSQL3 =   "SELECT COUNT(*) as ""NumberEE"" FROM ["& sv_SheetName &"$]"
+                              Set sv_objRecAdRs3 = CreateObject("ADODB.Recordset")
+								sv_objRecAdRs3.Open sv_strSQL3,sv_objConnAdCn3
+	              If sv_objRecAdRs3.EOF Then
+                                End If
+								' Moving to the First RecordSet
+								sv_objRecAdRs3.MoveFirst
+								strLoopCounter = 0 
+								'===============================================================================
+								Do While not  sv_objRecAdRs3.EOF
+								'Clear Previous Execution Data
+                                                     fn_GetTheCount  = sv_objRecAdRs3("NumberEE")
+												   Exit do
+								Loop  
+								Set sv_objConnAdCn3 = Nothing 
+End Function   
+
+
+'=================================================================================
+'Function Name : fn_GetTheCountToBeExecuted 
+'Description : Function can be used to retrieve the number of used rows in an excel sheet which matches a specified criteria.(Eg to get all row for input sheet with execution status marked as "Yes"
+'Input Parameter : pramInputSheetPath - Complete path of the excel,sv_SheetName - Name of the excel sheet,pramColName = Column name for which criteria needs to be checked,pramCompVal - Criteria for which count is to be retrieved.
+'Return Value: Returns the count of rows which match the criteria
+'=================================================================================
+
+Function fn_GetTheCountToBeExecuted (pramInputSheetPath,sv_SheetName,pramColName,pramCompVal)
+Set sv_objConnAdCn3 = CreateObject("ADODB.Connection")
+								sv_strDataFile3 =  pramInputSheetPath
+								sv_strConnection3="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile3 & ";ReadOnly=True;"
+								sv_objConnAdCn3.Open sv_strConnection3
+							  sv_strSQL3 =   "SELECT COUNT(*) as ""NumberEE"" FROM ["& sv_SheetName &"$] WHERE UCASE("&pramColName&") = '"&pramCompVal&"'"
+                              Set sv_objRecAdRs3 = CreateObject("ADODB.Recordset")
+								sv_objRecAdRs3.Open sv_strSQL3,sv_objConnAdCn3
+	              If sv_objRecAdRs3.EOF Then
+                                End If
+								' Moving to the First RecordSet
+								sv_objRecAdRs3.MoveFirst
+								strLoopCounter = 0 
+								'===============================================================================
+								Do While not  sv_objRecAdRs3.EOF
+								'Clear Previous Execution Data
+                                                     fn_GetTheCountToBeExecuted  = sv_objRecAdRs3("NumberEE")
+												   Exit do
+								Loop  
+								Set sv_objConnAdCn3 = Nothing 
+End Function   
+
+
+'=================================================================================
+'Function Name : fn_GetInputFromExcel 
+'Description : Function can be used to retrieve the number of used rows in an excel sheet which matches a specified criteria.(Eg to get all row for input sheet with execution status marked as "Yes"
+'Input Parameter : pramInputSheetPath - Complete path of the excel,sv_SheetName - Name of the excel sheet,pramColName = Column name for which criteria needs to be checked,pramCompVal - Criteria for which count is to be retrieved.
+'Return Value: Returns the count of rows which match the criteria
+'=================================================================================
+
+Function fn_GetInputFromExcel (pramIPFilePath,pramSheetName,pramColName)
+  On Error Resume Next
+Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+			sv_strDataFile = pramIPFilePath
+			sv_strConnection ="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+			sv_objConnAdCn.Open sv_strConnection
+			sv_strSQL="Select * from ["&pramSheetName&"$]"
+			Set sv_objRecAdRs = CreateObject("ADODB.Recordset")
+			sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+If sv_objRecAdRs.EOF Then
+			              '  fn_InsertQuery pramExecutionStatusSheetPath,"Sheet1","Details","No data retrieved from the input sheet.Please enter data in input sheet."
+							fn_UpdateErrorDetails "N/A","No Input Data Found in excel - "&pramIPFilePath&",sheet name - "&pramSheetName,"N/A","fn_GetInputFromExcel","","","0","Y"
+							fn_GetInputFromExcel = "FunctionError"
+							Exit Function
+					End If
+            sv_objRecAdRs.MoveFirst
+			'If the configuration file record set is empty the exit run
+		   			Do While not  sv_objRecAdRs.EOF
+							sv_Value = Trim(sv_objRecAdRs(pramColName))
+							 
+				   sv_objRecAdRs.MoveNext 	   
+			Loop				
+           fn_GetInputFromExcel = sv_Value
+fn_UpdateErrorDetails "N/A","Error Retrieving data from Excel - "&pramIPFilePath&", sheet name  - "&pramSheetName,Err.description,"fn_GetInputFromExcel","","Y",Err.Number,""
+If err.number <> 0  Then
+     fn_GetInputFromExcel = "FunctionError"
+	Exit Function
+End If
+		   
+End Function
+
+
+Function fn_GetInputFromExcel_Comp (pramIPFilePath,pramSheetName,pramColName,pramCompCol,pramCompVal)
+Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+			sv_strDataFile = pramIPFilePath
+			sv_strConnection ="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+			sv_objConnAdCn.Open sv_strConnection
+			sv_strSQL="Select * from ["&pramSheetName&"$] where ( "&pramCompCol&") = '"&pramCompVal&"'"
+			Set sv_objRecAdRs = CreateObject("ADODB.Recordset")  'where Ucase(TO_BE_EXECUTED)='YES' AND Ucase(NOMATCH) = '" & g_NoMatch & "'"
+			sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+			If sv_objRecAdRs.EOF Then
+			              '  fn_InsertQuery pramExecutionStatusSheetPath,"Sheet1","Details","No data retrieved from the input sheet.Please enter data in input sheet."
+							fn_UpdateErrorDetails "N/A","Unable to retrieve data from excel - "&pramIPFilePath&",check input columns,sheet name - "&pramSheetName,"N/A","fn_GetInputFromExcel_Comp","","","0","Y"
+            End If
+			'If the configuration file record set is empty the exit run
+		   			Do While not  sv_objRecAdRs.EOF
+							sv_Value = Trim(sv_objRecAdRs(pramColName))
+							 
+				   sv_objRecAdRs.MoveNext 	   
+			Loop				
+           fn_GetInputFromExcel_Comp = sv_Value
+End Function
+
+'=================================================================================
+'Function Name : fn_MailPassword
+'Description : Function can be used to retrieve the password from a specified outlook mail box.Function first searches for mail with specified subject line, and then retrieves data from inside the mail.
+'Input Parameter : pramInputSheetPath - Complete path of the excel,sv_SheetName - Name of the excel sheet,pramColName = Column name for which criteria needs to be checked,pramCompVal - Criteria for which count is to be retrieved.
+'Dependencies : Function currently coded to go to mails with subject line "Unum Password Request:", change this as per requirement.
+'Return Value: Returns "Mail Not Found" or the relevant password depending on whether it is found of not 
+'=================================================================================
+
+Public Function fn_MailPassword (sv_Mailid,sv_MailBoxName)
+   strPassword = "Outlook Error"
+   Wait(1)
+     Dim OlApp ,MyFolder ,InboxItems ,Mailobject, olNs
+						'Creating an object for accessing the Outlook Client.
+						Set OlApp = CreateObject("Outlook.Application")
+						set olNs= OlApp.GetNamespace("MAPI")
+						set MyFolder = olNs.Folders
+
+						Str_Count=1
+						Set  strMasterFolder=MyFolder.Item(Str_Count)
+						Do until strMasterFolder.Name = sv_MailBoxName ' Itest and UAT mails goes only to Iservices test mail folder
+								Str_Count=Str_Count+1
+							   Set  strMasterFolder=MyFolder.Item(Str_Count)
+						Loop
+						
+						Set MyFolder1=strMasterFolder.Folders
+						Str_Counter =1
+						Set  strSubFolder=MyFolder1.Item(Str_Counter)
+						Do until strSubFolder.Name ="Inbox"
+							Str_Counter=Str_Counter+1
+							Set strSubFolder=MyFolder1.Item(Str_Counter)
+						Loop
+						If Not strSubFolder Is Nothing Then
+    'Set objTaskFrom = strSubFolder.Items.Find("[From] = iServices") 
+	
+   Set objTask = strSubFolder.Items.Find("[Subject] = Unum Password Request: " & sv_Mailid) 
+  If Not objTask Is Nothing Then
+ sv_SenderName = objTask.sendername
+ If sv_SenderName= "iServices"  Then
+ strMailBody= objTask.Body
+							strPasswordStPos = Instr(1,strMailBody,"Password: Your temporary password is",1)
+												strPasswordStPos = strPasswordStPos + 37
+												'strPasswordEnPos = Instr(1,strMailBody,"NOTE! Temporary passwords contain the first four characters of your last name",1)
+												strPassword = Trim(Mid(strMailBody,strPasswordStPos,8))
+				Else								
+					 strPassword  = "Mail Not Found"   						
+End IF 
+	Else	
+		     strPassword  = "Mail Not Found"
+												
+	  End If
+	 
+						 End IF
+			fn_MailPassword = strPassword  	 
+			OlApp.quit
+			Set OlApp = nOTHING
+		   
+End Function
+
+'=================================================================================
+'Function Name : fn_UpdateQuerySingle 
+'Description : Function can be used to update an excel column with a specified value.
+'Input Parameter : pramPath- Complete path of the excel,pramSheetName - Name of the excel sheet,pramColName = Name of Column that needs to be updated,
+'pramValue - Value that needs to be updated, pramCompareCol pramCompareVal - Column name and column value that needs to be included in the where clause.
+'Return Value: None
+'=================================================================================
+
+
+Function fn_UpdateQuerySingle (pramPath,pramSheetName,pramColName,pramValue,pramCompareCol,pramCompareVal)
+Dim oADO, oRS
+Dim sOutput
+Dim aZIPs,i, sZIP
+Set oADO = CreateObject("ADODB.Connection")
+sv_strDataFile1 =  pramPath
+sv_strConnection1="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile1 & ";ReadOnly=True;"
+oADO.Open  sv_strConnection1
+
+sSQL =  "update ["&pramSheetName&"$] set ["&pramColName&"]='" & pramValue & "' where Ucase("&pramCompareCol&") = '" & pramCompareVal & "'"
+             Set oRS = oADO.Execute(sSQL)
+Set oADO = Nothing
+End Function
+
+'=================================================================================
+'Function Name : fn_SetBluezone 
+'Description : Function can be used to set terminal emulator to bluezone.(Used after triggering  a TE related Macro OR during script initialization)
+'Input Parameter : None
+'Return Value: None
+'Dependancies: Need to also use error handling function and related excels (fn_UpdateErrorDetails)
+'=================================================================================
+
+Function fn_SetBluezone ()
+On Error Resume Next
+Dim App 'As Application
+Set App = CreateObject("QuickTest.Application")
+App.Launch
+App.Visible = True
+ App.Launch
+App.Visible = True
+App.Options.TE.CurrentEmulator = "BlueZone 3.2"
+fn_UpdateErrorDetails  "N/A","Unable to initilize system.",Err.description,"fn_SetBluezone","","Y",Err.Number,""
+If err.number <> 0  Then
+     fn_SetBluezone = "FunctionError"
+	Exit Function
+End If
+App.Options.TE.Protocol = "3270"
+App.Options.TE.AutoAdvance = 0
+App.Options.TE.CodePage = 0
+App.Options.TE.HllapiDllName = "C:\Program Files\SEAGULL\BlueZone\WHLAPI32.dll"
+App.Options.TE.HllapiProcName = "hllapi"
+App.Options.TE.VerifyHllapiDllPath = 1
+App.Options.TE.AutoSyncKeys = "13"
+App.Options.TE.RecordMenusAndPopups = 1
+App.Options.TE.RecordCursorPosition = 1
+App.Options.TE.TrailingMode = 1
+App.Options.TE.TrailingFieldLength = 5
+App.Options.TE.UsePropertyPattern = 1
+App.Options.TE.PropertyPatternsFile = "C:\Program Files\HP\QuickTest Professional\Dat\PropertyPatternConfigTE.xml"
+fn_UpdateErrorDetails  "N/A","Unable to initilize system.",Err.description,"fn_SetBluezone","","Y",Err.Number,""
+If err.number <> 0  Then
+     fn_SetBluezone = "FunctionError"
+	Exit Function
+End If
+App.Options.TE.SyncTime = 200
+App.Options.TE.ScreenTitleRow = "1"
+App.Options.TE.ScreenTitleCol = "1"
+App.Options.TE.ScreenTitleLength = "30"
+fn_UpdateErrorDetails "N/A","Unable to initilize system.",Err.description,"fn_SetBluezone","","Y",Err.Number,""
+If err.number <> 0  Then
+     fn_SetBluezone = "FunctionError"
+	Exit Function
+End If
+End Function
+
+'=================================================================================
+'Function Name : fn_ChangeBluezone
+'Description : Function can be used to set terminal emulator Rumba 7 (Non bluezone).(Used before triggering  a TE related Macro)
+'Input Parameter : None
+'Return Value: None
+'=================================================================================
+
+Function fn_ChangeBluezone()
+Dim App 'As Application
+Set App = CreateObject("QuickTest.Application")
+App.Launch
+App.Visible = True
+App.Options.TE.CurrentEmulator = "Rumba 7"
+App.Options.TE.Protocol = "autodetect"
+App.Options.TE.AutoAdvance = 0
+App.Options.TE.CodePage = 0
+'App.Options.TE.HllapiDllName = "C:\Program Files\SEAGULL\BlueZone\ehlapi32.dll"
+App.Options.TE.HllapiDllName = ""
+App.Options.TE.HllapiProcName = "hllapi"
+App.Options.TE.VerifyHllapiDllPath = 1
+App.Options.TE.AutoSyncKeys = "13"
+App.Options.TE.RecordMenusAndPopups = 1
+App.Options.TE.RecordCursorPosition = 1
+App.Options.TE.TrailingMode = 1
+App.Options.TE.TrailingFieldLength = 5
+App.Options.TE.UsePropertyPattern = 1
+App.Options.TE.PropertyPatternsFile = "C:\Program Files\HP\QuickTest Professional\Dat\PropertyPatternConfigTE.xml"
+App.Options.TE.SyncTime = 200
+App.Options.TE.ScreenTitleRow = "1"
+App.Options.TE.ScreenTitleCol = "1"
+App.Options.TE.ScreenTitleLength = "30"
+  End Function
+
+'=================================================================================
+'Function Name : fn_PasteExcelRange
+'Description : Function can be used to paste data from one excel to another
+'Input Parameter : strMainFilePath - Path of excel sheet having data,strScenarioFilePath - path of excel into which data is to be pasted,strCopySheet - sheet name,strPasteSheet - paste into sheet name,StartColum,EndColumn - Range of columns that is to be copied and pasted
+'Return Value: None
+'Sample Function Call : fn_PasteExcel g_str_InputMainpathEnv,g_str_InputMainpath,"SSN_Status_"&g_str_Environment,"SSN_Status","A","E","A","e",2
+'=================================================================================
+Function fn_PasteExcelRange (strMainFilePath,strScenarioFilePath,strCopySheet,strPasteSheet,strCopySheetURange,strCopySheetLRange,strPasteSheetURange,strPasteSheetLRange,strOffset)
+Set xlApp = CreateObject("Excel.Application")
+'Set xlApp = GetObject(,"Excel.Application")
+'If xlApp Is Nothing Then
+'       Wait(10)
+'Set xlApp = GetObject(,"Excel.Application")	   
+'End If
+Set xlBook = xlApp.Workbooks.Open(strMainFilePath)
+Set xlSheet = xlBook.Worksheets(strCopySheet)
+xlapp.visible = False
+'xlapp.Worksheets(1).Activate
+Set xlSheet = xlBook.Worksheets(strCopySheet)
+  'strOffset = 2
+  strRange = xlSheet.UsedRange.rows.Count '- get col count
+  fn_PasteExcelRange = strRange 
+If strRange < strOffset Then
+	strRange  = strOffset
+End If
+  
+ K = strCopySheetURange&strOffset
+ J = strCopySheetLRange&strRange
+xlsheet.range(""&K&":"&J&"").copy   
+
+Set xlApp2 = CreateObject("Excel.Application")
+Set xlBook2 = xlApp2.Workbooks.Open(strScenarioFilePath)
+set xlSheet2 = xlBook2.Worksheets(strPasteSheet)
+xlSheet2.Activate 'The sheet needs to be active
+ z = strPasteSheetURange&strOffset
+ T = strPasteSheetURange&strRange
+xlSheet2.Range(""&Z&":"&T&"").Select 
+xlSheet2.Paste
+xlBook2.save 
+xlBook.save
+xlBook.Close False
+'xlApp.activeworkbook.SaveAs(strMainFilePath)
+xlApp.quit
+xlApp2.quit
+End Function
+
+
+
+'=================================================================================
+'Function Name : fn_CreateFolder
+'Description : Function can be used to create a folder with specified name at the location
+'Input Parameter : pramDirectoryPath - The path in which folder is to be created along with the folder name
+'Return Value: Returns "Pass" if folder was created successfully else value - "Fail" is returned.
+'Sample Function Call : strFolderCreationStatus = fn_CreateFolder(g_strMainPathForResult) 
+'=================================================================================
+Function fn_CreateFolder (pramDirectoryPath)
+On error resume next
+' Create the File System Object
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+' Note If..Exists. Then, Else ... End If construction
+If objFSO.FolderExists((pramDirectoryPath)) Then
+   Set objFolder = objFSO.GetFolder((pramDirectoryPath))
+Else
+   Set objFolder = objFSO.CreateFolder((pramDirectoryPath))
+End If
+
+If err.number <> 0 then
+  'Return Error Code
+    fn_CreateFolder = "Fail"
+Else
+	 fn_CreateFolder = "Pass"
+End If	
+ On Error Goto 0 
+End Function
+
+'=================================================================================
+'Function Name : fn_SetQTPSyncTime
+'Description : Function can be used to set QTP's Object sync time
+'Input Parameter : pramSyncTime - Time that need to be set
+'Return Value: None
+'Sample Function Call : fn_SetQTPSyncTime 18000
+'=================================================================================
+
+Public Function fn_SetQTPSyncTime(pramSyncTime)
+	Dim App
+	Set App = CreateObject("QuickTest.Application")
+	App.Test.Settings.Run.ObjectSyncTimeOut = pramSyncTime
+End Function
+
+'=================================================================================
+'Function Name : fn_SetQTPRunMode
+'Description : Function can be used to set QTP's run mode (to fast or slow)
+'Input Parameter : psv_Mode -  'Fast' or 'Slow'
+'Return Value: None
+'Sample Function Call : fn_SetQTPRunMode "Fast"
+'=================================================================================
+
+Public Function fn_SetQTPRunMode(sv_Mode)
+Dim App 'As Application
+Set App = CreateObject("QuickTest.Application")
+App.Launch
+App.Visible = True
+If sv_Mode = "Fast" Then
+	App.Options.Run.RunMode = "Fast"
+ElseIf sv_Mode = "Normal" Then
+	App.Options.Run.RunMode = "Normal"
+End If
+End Function
+
+
+'=================================================================================
+'Function Name : fn_DeleteSheetsInExcel
+'Description : Function can be used to delete the first sheet in a specified excel
+'Input Parameter : strSheetPath - Full path of the excel sheet containing the sheets that need to be deleted
+'Return Value: None
+'=================================================================================
+
+Function fn_DeleteSheetsInExcel (strSheetPath)
+Set xl = CreateObject("Excel.Application")
+xl.Visible = False
+set wb=xl.workbooks.open(strSheetPath)
+xl.application.displayalerts=false
+'If wb.worksheets.count > 1
+wb.worksheets(1).delete
+'wb.worksheets(1).delete
+'End If 
+xl.application.displayalerts=true
+wb.save
+wb.close
+xl.quit
+set wb=nothing
+set xl=nothing
+End Function
+
+
+'=================================================================================
+'Function Name : fn_SyncTeScreen
+'Description : Function can be used for Terminal Emulator Screen Syncing
+'Input Parameter : strWaitTime - Maximum function time time before exiting
+'Return Value: Return "Fail" if TE screen did not sync even after the full wait time.
+'=================================================================================
+
+Function fn_SyncTeScreen (strWaitTime)
+strStatus=Null
+strWaitDur = ""
+strTime = 0 
+strStatus = Trim (Tewindow("short name:=A").GetROProperty("emulator status"))
+Do until strStatus="Ready"
+Wait(1)
+strTime = strTime + 1
+strStatus = trim (Tewindow("short name:=A").GetROProperty("emulator status"))
+If strTime = strWaitTime Then
+  strWaitDur = "Fail"
+	Exit do 
+End If
+Loop
+fn_SyncTeScreen = strWaitDur
+End Function
+
+
+'=================================================================================
+'Function Name : fn_DeleteAllXMLFilesInFolder
+'Description : Function can be used to delete all files with extension - .xml (in the specified location)
+'Input Parameter : pramFilepath - Folder location (complete path)
+'Return Value: None
+'=================================================================================
+Function fn_DeleteAllXMLFilesInFolder(pramFilepath)
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+Set demofolder = objFSO.GetFolder(pramFilepath)
+Set filecoll = demofolder.Files 
+FileCount = filecoll.count
+If FileCount > 0  Then
+objFSO.DeleteFile(pramFilepath & "\*.xml"), DeleteReadOnly
+End If
+End Function
+
+
+'=================================================================================
+'Function Name : fn_DeleteFiles 
+'Description : Function can be used to delete a specified file
+'Input Parameter : pramFilepath - File location (complete path) 
+'Return Value: None
+'=================================================================================
+
+Function fn_DeleteFiles (pramFilepath)
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+If objFSO.FileExists(pramFilepath) Then
+objFSO.DeleteFile(pramFilepath), DeleteReadOnly
+End If
+End Function
+
+
+'=================================================================================
+'Function Name : fn_TriggerMacroPassData 
+'Description : Function can be used to trigger an excel macro function (On a seperate excel sheet) and pass values into the function
+'Input Parameter : sv_MacroPath - Full path of excel which contains macro,
+'pramMacroName - Name of macro that is to be triggered Eg - "DBC_Macro.xls!Compare" where Compare is sub name locatied in excel DBC_Macro.xls
+'sv_FunctionName - Name of Function inside macro,sv_Val_One,sv_Val_Two - Values that are to be passed into the macro
+'Return Value = Any data that is being returned from the excel macro
+'=================================================================================
+
+
+Public Function fn_TriggerMacroPassData (sv_MacroPath,sv_MacroName,sv_ResultsPath,sv_FunctionName,sv_Val_One,sv_Val_Two)
+				Set objExcel = CreateObject("Excel.Application")
+				objExcel.Visible = True
+                                Set objWorkbook = objExcel.Workbooks.Open(sv_MacroPath)
+			Set objWorkbook1 = objExcel.Workbooks.Open(sv_ResultsPath)
+			M_ReturnCode = objWorkbook1.Application.Run(sv_MacroName &".xls!" & sv_FunctionName,sv_Val_One,sv_Val_Two)
+					objWorkbook1.Save 
+				objWorkbook1.Close 
+				objWorkbook.Close
+			'objExcel.Close
+			SystemUtil.CloseProcessByName("EXCEL.EXE")
+		fn_TriggerMacroPassData = M_ReturnCode
+End Function
+
+'=================================================================================
+'Function Name : fn_CheckTEScreenTitle
+'Description : Function can be used to verify the title of a TE Screen
+'Input Parameter : pramScreenTitle - Expected screen title
+'Return Value = Returns True of False depending on whether expected screen appears or not
+'=================================================================================
+
+
+Function fn_CheckTEScreenTitle (pramScreenTitle)
+   ScreenText = TeWindow("TeWindow").TeScreen("micclass:=TeScreen").GetText
+   If instr(1,ScreenText,pramScreenTitle) > 0 Then
+	   fn_CheckTEScreenTitle = True
+   Else
+		fn_CheckTEScreenTitle = False  
+   End If
+End Function
+
+'=================================================================================
+'Function Name : fn_SaveExcelAsFFC
+'Description : Function can be used to save an excel file in ffc format
+'Input Parameter : pram_strSource,pram_strDestination - Source and destination file locations
+'Dependency : Must be used along with function fg_DeleteFile 
+'Return Value = None 
+'Note : Function deletes the source file after converting it to ffc
+'=================================================================================
+
+Function  fn_SaveExcelAsFFC(pram_strSource,pram_strDestination)
+' create an Excel object reference 
+Set objXL = CreateObject ("Excel.Application") 
+objXL.Visible = False         ' show window 
+' Load the Excel file from the script's folder 
+Set objWb = objXl.WorkBooks.Open(pram_strSource) 
+' Get the loaded worksheet object 
+Set objWb = objXL.ActiveWorkBook.WorkSheets("Sheet3") 
+objWb.Activate               ' not absolutely necessary 
+' turn off  warning messages 
+OBJXL.DISPLAYALERTS = FALSE 
+objxl.ActiveWorkbook.SaveAs pram_strDestination, -4158 
+objXl.Quit() 
+Set objXL = Nothing 
+Set objWB = Nothing 
+wAIT(4)
+fg_DeleteFile pram_strSource
+End Function
+
+'=================================================================================
+'Function Name : fn_VerifyPageTitle 
+'Description : Function can be used to verify if a specified page appears in the specified browser
+'Input Parameter : pram_BrwTitle,pram_PgTitle - the expected browser and page title.
+'Return Value = Returns string 'Pass' or 'Fail' depending on whether  
+'Note : Function works properly only if a browser is open at the time of executing (i.e between page navigations etc)
+'=================================================================================
+
+Function fn_VerifyPageTitle (pram_BrwTitle,pram_PgTitle)
+   gFlag = False
+set oDesc = Description.Create() 
+oDesc("micclass").Value = "Browser" 
+oDesc("title").Value = pram_BrwTitle
+set pDesc = Description.Create() 
+pDesc("micclass").Value = "Page" 
+pDesc("title").Value = pram_PgTitle
+set oChild = Desktop.ChildObjects(oDesc)
+oChildCount = oChild.Count
+If oChildCount = 1 Then
+	   set pChild = Browser(oDesc).ChildObjects(pDesc)
+	      pChildCount =  pChild.count
+If pChildCount = 1  Then
+        gFlag = True
+End If
+End If	 
+
+   If gFlag Then
+        fn_VerifyPageTitle = "Pass"
+	Else 
+		fn_VerifyPageTitle = "Fail"
+   End If
+End Function	   
+
+
+'=================================================================================
+'Function Name : fn_SyncWindow 
+'Description : Function can be used for Windows Syncing
+'Input Parameter : pramSyncTime - Maximum time the function waits before exiting
+'Return Value: None
+'=================================================================================
+
+
+Function fn_SyncWindow (pramSyncTime)
+	set oDesc = Description.Create() 
+	    oDesc("micclass").Value = "Window" 
+	    'Below class vary depends on window applicaiton
+	    oDesc("regexpwndclass").Value = "HTML Application Host Window Class" 
+	Set oChild = Desktop.ChildObjects(oDesc)
+	    oChildCount = oChild.count
+		'If we have only one window opened in Desktop.
+		If  oChildCount = 1 Then
+			For i = 0 to pramSyncTime
+				strStatus = Window(oDesc).getRoProperty("enabled")
+				If strStatus = True Then
+					Reporter.ReportEvent micPass,"micPass","value in " & i
+					Exit For
+				End If
+			Next
+		End If
+End Function
+
+
+'=================================================================================
+'Function Name : fn_WaitForProcess  
+'Description : Function can be used to force script to wait for a specified process for a specified time
+'Input Parameter : pramProcessName - the process for which the script waits,pramMaxWaitTime - maximum wait time (after which script exists function)
+'Return Value: Returns string 'False" is process does not appear with the specified time
+'=================================================================================
+
+Function fn_WaitForProcess (pramProcessName,pramMaxWaitTime)
+   strFileNotFound = "False"
+sComputer = "."    ' use "." for local computer
+Set oWmi = GetObject("winmgmts:{impersonationLevel=impersonate}!\\" & sComputer & "\root\cimv2")
+Set oShell = CreateObject("WScript.Shell")
+' go into eternal loop
+Do
+  Set colProcessList = oWmi.ExecQuery ("Select * from Win32_Process Where Name = '" & pramProcessName & "'")
+
+  If colProcessList.Count <> 0 Then
+   		   Exit do
+   End If
+Wait(1)
+Counter = Counter + 1
+If Counter = pramMaxWaitTime Then
+    strFileNotFound = "True"
+ Exit do
+End If
+ Loop
+fn_WaitForProcess = strFileNotFound 
+ End Function
+
+'=================================================================================
+'Function Name : fn_PasteOpenExcelRange
+'Description : Function can be used to paste data from an OPEN excel to another
+'Input Parameter : pramPDFFilePath - Path of excel sheet having data (OPEN EXCEL),strScenarioFilePath - path of excel into which data is to be pasted,strCopySheet - sheet name,strPasteSheet - paste into sheet name,strCopySheetURange,strCopySheetLRange,strPasteSheetURange,strPasteSheetLRange - Range of columns that is to be copied and pasted
+'Return Value: None
+'Sample Function Call : fn_PasteOpenExcelRange g_str_InputMainpathEnv,g_str_InputMainpath,"SSN_Status_"&g_str_Environment,"SSN_Status","A","E","A","e",2
+'=================================================================================
+
+Function fn_PasteOpenExcelRange (pramPDFFilePath,strScenarioFilePath,strPasteSheet,strCopySheetURange,strCopySheetLRange,strPasteSheetURange,strPasteSheetLRange,strOffset)
+'Set xlApp = CreateObject("Excel.Application")
+Set xlApp = GetObject(,"Excel.Application")
+'If xlApp Is Nothing Then
+'       Wait(10)
+'Set xlApp = GetObject(,"Excel.Application")	   
+'End If
+'Set xlBook = xlApp.Workbooks.Open(strMainFilePath)
+'Set xlSheet = xlBook.Worksheets(strCopySheet)
+'xlapp.visible = False
+xlapp.Worksheets(1).Activate
+Set xlSheet = xlapp.Worksheets(1)
+  'strOffset = 2
+  strRange = xlSheet.UsedRange.rows.Count '- get col count
+  
+ K = strCopySheetURange&strOffset
+ J = strCopySheetLRange&strRange
+xlsheet.range(""&K&":"&J&"").copy   
+
+Set xlApp2 = CreateObject("Excel.Application")
+Set xlBook2 = xlApp2.Workbooks.Open(strScenarioFilePath)
+set xlSheet2 = xlBook2.Worksheets(strPasteSheet)
+xlSheet2.Activate 'The sheet needs to be active
+ z = strPasteSheetURange&strOffset
+ T = strPasteSheetURange&strRange
+xlSheet2.Range(""&Z&":"&T&"").Select 
+xlSheet2.Paste
+xlBook2.save 
+'xlBook.save
+'xlBook.Close False
+xlApp.activeworkbook.SaveAs(pramPDFFilePath)
+xlApp.quit
+xlApp2.quit
+End Function
+
+
+
+'=================================================================================
+'Function Name : fn_ChangeExcelColumnName 
+'Description : Function can be used to search for a specified column name in an excel and replace it with a new name 
+'Input Parameter : pram_strSourceFile ,pram_strDestinationFile,pramFindColumnName,pramReplcaeColumnName
+'Return Value: None
+'=================================================================================
+
+Function fn_ChangeExcelColumnName (pram_strSourceFile ,pram_strDestinationFile,pramFindColumnName,pramReplaceColumnName)
+		Set xl=CreateObject("Excel.Application")
+		'Read-only is false
+		xl.Workbooks.Open pram_strSourceFile,,False
+		Set str_firstitem = xl.Range("A1:IV65536").Find(pramFindColumnName)
+		If Not IsEmpty(str_firstitem) Then
+			str_firstitem.Offset(0, 0) = pramReplaceColumnName
+		End If
+		'Pick one
+		'Set str_seconditem = xl.Range("A1:IV65536").Find("POL#")
+		'If Not IsEmpty(str_seconditem) Then
+		'	str_seconditem.Offset(0, 0) = "POL"
+		'End If
+	  
+	    xl.ActiveWorkbook.Worksheets(1).SaveAs pram_strDestinationFile
+		xl.Visible=False'True
+		xl.Quit
+End Function 
+
+'=====================================================================================
+
+'Function Name : Latest_Date 
+'Description : Function can be used to retrieve the latest date provided with 2 dates
+'Input Parameter : temp_a,temp_b
+'Return Value: Latest Date
+'======================================================================================
+Public Function Latest_Date (temp_a,temp_b)
+'==============================================Getting years=================================================================================================
+ yDueDate1=Right(temp_a,2)
+ yDueDate2=Right(temp_b,2)
+'==============================================Getting Months=================================================================================================
+mDueDate1=Left(temp_a,2)
+mDueDate2=Left(temp_b,2)
+'=================================================Getting Dates===================================================================
+dDueDate1=mid(temp_a,3,2)
+dDueDate2=mid(temp_b,3,2)
+	If  yDueDate1<yDueDate2 Then
+			Latest_Date =DueDate2
+	Elseif yDueDate1>yDueDate2 Then
+			Latest_Date=DueDate1
+	ElseIf  yDueDate1=yDueDate2 Then
+	    If  mDueDate1< mDueDate2 Then
+			Latest_Date= DueDate2
+	     ElseIf mDueDate1>mDueDate2 Then
+			Latest_Date=DueDate1
+	     Elseif mDueDate1=mDueDate2 Then
+	   	   If  dDueDate1< dDueDate2 Then
+			Latest_Date=dDueDate2
+		   Elseif dDueDate1>dDueDate2  Then
+			Latest_Date=dDueDate1
+		   Else
+			Latest_Date=DueDate1
+		   End If
+	   End If
+
+	End If
+																				 
+End Function
+'===============================================================================================================================
+'Function Name : Index_Retrival
+'Description : Function can be used to select particular statement based on index
+'Input Parameter : None
+'Return Value: Index
+'==============================================================================================================================	
+Public Function  fn_Index_Retrival()
+  g_inc_flag=1
+  Set EditDesc = Description.Create() 
+	EditDesc("micclass").Value = "WebElement" 
+	EditDesc("class").Value = "innerLeftColumn" 
+	Datatable.AddSheet("Index_Tempsheet")
+	Datatable.GetSheet("Index_Tempsheet").Addparameter"Name",""
+	Datatable.GetSheet("Index_Tempsheet").Addparameter"DueDate",""
+	Datatable.GetSheet("Index_Tempsheet").Addparameter"CovPeriod",""
+	Datatable.GetSheet("Index_Tempsheet").Addparameter"Index",""
+	Datatable.GetSheet("Index_Tempsheet").Addparameter"Status",""
+	Set s= Browser("Brw_Unum_Home").Page("Pg_Unum").ChildObjects(EditDesc)
+	c =s.count
+		ii = 1
+		For i=0 to c-3
+			d= s(i).getroproperty("innertext")
+			datatable.GetSheet("Index_Tempsheet").SetCurrentRow(ii)
+			dd=split(d,"Payment Due:")
+			g=dd(1)
+			dda = Split(dd(0),"Coverage Period:")
+			ddaa=Split(dda(0),"-")
+			ddaaa=ddaa(1)
+			datatable("Name","Index_Tempsheet")=d
+                        datatable("DueDate","Index_Tempsheet")=g
+			datatable("CovPeriod","Index_Tempsheet")=ddaaa
+			datatable("Index","Index_Tempsheet")=ii-1
+				ii = ii + 1
+		Next
+			set EditDesc1 = Description.Create() 
+			EditDesc1("micclass").Value = "WebElement" 
+			EditDesc1("class").Value = "innerRightColumn" 
+			set s1 =Browser("Brw_Unum_Home").Page("Pg_Unum").ChildObjects(EditDesc1)
+			c1 =s1.count
+			ii1 = 1
+				For i1=0 to c1-1
+					d1= s1(i1).getroproperty("innertext")
+					datatable.GetSheet("Index_Tempsheet").SetCurrentRow(ii1)
+					dd1=split(d1,"Next Step")
+					g1=Split(dd1(0),"Status:")
+					datatable("Status","Index_Tempsheet")=g1(1)
+					ii1 = ii1+ 1
+				Next
+                                sv_Rcount = DataTable.GetSheet("Index_Tempsheet").GetRowCount
+					sv_inc = 1
+					ReDim sv_Duedate(25)
+					ReDim sv_Index(25)
+					For sv_Rcounti = 1 to sv_Rcount
+					DataTable.GetSheet("Index_Tempsheet").SetCurrentRow(sv_Rcounti)
+					sv_EBCN = Trim(DataTable.Value("CovPeriod","Index_Tempsheet"))
+					sv_Status = Trim(DataTable.Value("Status","Index_Tempsheet"))
+					If (sv_EBCN = g_EBCN) and ((sv_Status = "New") or (sv_Status="Open In Process")) Then
+					g_Billing_Name=Datatable("Name","Index_Tempsheet")
+					sv_Index(sv_inc) = DataTable.Value("Index","Index_Tempsheet")
+					sv_inc = sv_inc + 1
+					g_inc_flag =0
+					End If
+					Next
+					If g_inc_flag=0  Then
+						fn_Index_Retrival=sv_Index(sv_inc-1)
+                                   End If 
+End Function
+
+'=========================================================================================================================
+'Function Name : KillNotePad
+'Description : Function can be used to kill the process
+'Input Parameter : None
+'Return Value: None
+'=======================================================================================================================
+Function KillNotePad()
+wait(5)
+strComputer = "."
+Set objWMIService = GetObject("winmgmts:" _
+    & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+Set colProcessList = objWMIService.ExecQuery _
+    ("SELECT * FROM Win32_Process WHERE Name = 'notepad.exe'")
+For Each objProcess in colProcessList
+    objProcess.Terminate()
+Next
+End Function
+
+'=========================================================================================================================
+'Function Name : ClearCache
+'Description : Function can be used to clear the cache
+'Input Parameter : None
+'Return Value: None
+'=======================================================================================================================
+Public Function fn_ClearCache()
+
+	Const Temp_Int_Files = &H20&
+	Const COOKIES = &H21&
+	Const History = &H22&
+	Set objShell = CreateObject("Shell.Application")
+
+	Set objFolder1 = objShell.Namespace(Temp_Int_Files)
+	Set objFolder2 = objShell.Namespace(COOKIES)
+	Set objFolder3 = objShell.Namespace(History)
+
+	Set objFolderItem1 = objFolder1.Self
+	Set objFolderItem2 = objFolder2.Self
+	Set objFolderItem3 = objFolder3.Self
+
+	strPath1 = objFolderItem1.Path & "\*.*"
+	strPath2 = objFolderItem2.Path & "\*.*"
+	strPath3 = objFolderItem3.Path & "\*.*"
+
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	objFSO.DeleteFile(strPath1)
+    objFSO.DeleteFile(strPath3)
+'	objFSO.DeleteFile(strPath2)
+
+End Function
+'=========================================================================================================================
+'Function Name : Update_Status
+'Description : Function can be used to update the status
+'Input Parameter : status message 
+'Return Value: None
+'=======================================================================================================================
+
+Public Function fn_Update_Status(sv_StatusMsg)
+	Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+				sv_strDataFile = g_strMainPath &"\Input\Input.xls"
+				sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+				sv_objConnAdCn.Open sv_strConnection
+'Connection for the data sheet - to be updated
+			strsql = "update [Day2$] set [Status]='" & sv_StatusMsg & "' where EBCN= '" & g_strEBCN & "'"
+'Updating the data sheet with Prospect number
+	sv_objConnAdCn.Execute (strsql)
+      sv_objConnAdCn.close
+      Set sv_objConnAdCn = Nothing
+End Function
+'======================================================================================================================
+'=========================================================================================================================
+'Function Name : InsertPolicy
+'Description : Function can be used to insert policy
+'Input Parameter : plancode,policy no. It is not restricted to these 2 parameters. this function is useful to insert the row.
+'Return Value: None
+'=======================================================================================================================
+
+Public Function fn_USD_InsertPolicy(sv_Plan_Code,sv_PolicyNo)
+
+				Set sv_objConnAdCn = CreateObject("ADODB.Connection") 
+				'sv_strDataFile = "C:\QTP Scripts\7100 Transactions\Configuration\7100Validation_Template.xls" 
+				sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+				sv_objConnAdCn.Open sv_strConnection
+				sv_strSQL = "SELECT *  FROM [PEReport$]" 
+
+				strsql =  "INSERT INTO [PEReport$]  (PolicyNo,PE_PlanCode1) VALUES ('" & sv_PolicyNo &"','" & sv_Plan_Code &"')" 
+				sv_objConnAdCn.Execute (strsql)
+				sv_objConnAdCn.close
+				Set sv_objConnAdCn = Nothing
+				
+End Function
+
+
+'=========================================================================================================================
+'Function Name : sysname
+'Description : Function  can be used to retrieve the computer name
+'Input Parameter : None
+'Return Value: computer name
+'=======================================================================================================================
+Function fn_sysname()
+set wshnetwork=createobject("wscript.network")
+MachineName=wshnetwork.computername
+set wshnetwork=nothing
+End Function
+
+''=========================================================================================================================================================
+'Function Name		:Decrypt()
+'Input		   	:encryptedstring
+'Desc			:Function can be used to decrypt Password
+'Return Value		:Decrypted password 
+''=========================================================================================================================================================
+Private Function Decrypt(ByVal encryptedstring)
+    Dim x, i, tmp
+    encryptedstring = StrReverse(encryptedstring)
+    For i = 1 To Len(encryptedstring)
+        x = Mid(encryptedstring, i, 1)
+        tmp = tmp & Chr(Asc(x) - 1)
+    Next
+    Decrypt = tmp
+End Function
+
+
+'##############################################################################################################################
+'Function Name   : UDF_Move_Res()                         
+'Description     : The function moves the results folder to the specified directory
+'Input Parameters: Dest_path                     
+'Return Values   : None                 
+'##############################################################################################################################
+
+Public Function UDF_move_res(Dest_path)
+
+	Set fso = createObject("Scripting.FileSystemObject")
+	val = reporter.ReportPath
+	fso.CopyFolder val, Dest_path
+
+End Function
+
+'##############################################################################################################################
+'Function Name   : Errorlog()                         
+'Description     : The function moves the results folder tp spacified directory
+'Input Parameters: Errordetails
+'Return Values   : None                 
+'##############################################################################################################################
+Function Errorlog(Errordetails)
+   Dim fso, MyFile
+   Set fso = CreateObject("Scripting.FileSystemObject")
+   sv_FileName = MonthName(Month(now),True) & "_" & Day(Now) & "_" & Year(Now) & "(" & Hour(Now) & "." & Minute(Now) & "." & Second(Now) & ")" 
+   Set MyFile = fso.CreateTextFile(g_strErrorlogPath&"\CCPError"&sv_FileName&".txt", True)
+   If TeWindow("TeWindow").Exist(1) Then
+	   TeWindow("TeWindow").CaptureBitmap g_strErrorlogPath&"\CCPError"&sv_FileName&".png"
+   End If
+   MyFile.WriteLine(Errordetails)
+   MyFile.Close
+End Function
+
+

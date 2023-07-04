@@ -1,0 +1,47 @@
+''==================================================================================================================================
+'#Function Name   : age_calc()
+'#Description     : The function calculates the current age. 
+'#Input Parameters:                      
+'#Return Values   : None                 
+'==================================================================================================================================
+
+Public Function age_calc(DoB)
+ 
+sv_Current_Date = Date   
+'
+mydate = Split(sv_Current_Date , "/")
+m_Current =cint(mydate(0))
+d_Current = cint(mydate(1))
+y_Current =cint(mydate(2))
+'
+mydate = Split(DoB , "/")
+mDOB =cint(mydate(0))
+dDOB = cint(mydate(1))
+yDOB =cint(mydate(2))
+
+year_temp = y_Current - yDOB
+'
+'======TO Get the Age============
+If m_Current > mDOB Then
+    g_diff_year = year_temp
+    Else
+        If m_Current < mDOB Then
+            g_diff_year = year_temp - 1
+            Else
+            If m_Current = mDOB Then
+                If d_Current > dDOB Then
+                    g_diff_year = year_temp
+                    Else
+                        If d_Current < dDOB Then
+                            g_diff_year = year_temp - 1
+                            Else
+                                If d_Current = dDOB Then
+                                    g_diff_year = year_temp
+                                End If
+                        End If
+                End If
+            End If
+        End If
+End If
+'
+End Function

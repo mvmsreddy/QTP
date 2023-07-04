@@ -1,0 +1,274 @@
+{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf540
+{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\froman\fcharset0 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;\red0\green13\blue255;\red82\green0\blue80;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww9000\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\ql\qnatural
+
+\f0\fs26 \cf2 '===============================================================================\uc0\u8232 ' Name: Generic _Functions \u8232 ' Purpose: The file contains various library functions to interact with SRM UI \u8232 ' Functions:\u8232 '\'a0\'a0\'a0\'a0 Check_Object \u8232 ' Author: Debashish\'a0\u8232 ' Start: [development start date]\u8232 ' Modified: [last modification date]\u8232 '===============================================================================\cf0 \
+\pard\pardeftab720\ql\qnatural
+
+\f1\fs32 \cf0 \'a0
+\f0\fs26 \
+\pard\pardeftab720\ql\qnatural
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Function Click_Button\u8232 ' Input:\u8232 '\'a0\'a0 ByVal BName As Variant - Name of the Button \u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Button_index As Variant - Index of the Button\'a0 ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Buttons\'a0 with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Click a button \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\pard\pardeftab720\ql\qnatural
+
+\f1\fs32 \cf0 \'a0
+\f0\fs26 \
+\pard\pardeftab720\ql\qnatural
+\cf2 Function Click_Button (BName , Page_Type, Browser_index, Button_index)\cf0 \
+\pard\pardeftab720\ql\qnatural
+
+\f1\fs32 \cf0 \'a0
+\f0\fs26 \
+\pard\pardeftab720\ql\qnatural
+\cf2 If\'a0 Page_Type = "Page" Then\uc0\u8232 \'a0Browser("micClass:=browser","CreationTime:=" & Browser_index ).Page("micClass:=page").SAPButton("micClass:=SAPButton" ,"name:="& Bname,"index:=" & Button_index\'a0 ).Click \u8232 Else \u8232 \'a0Browser("micClass:=browser","CreationTime:=" & Browser_index ).SAPPortal("micClass:=SAPPortal").SAPButton("micClass:=SAPButton" ,"name:="& Bname,"index:=" & Button_index\'a0 ).Click \u8232 End If\cf0 \
+\pard\pardeftab720\ql\qnatural
+
+\f1\fs32 \cf0 \'a0
+\f0\fs26 \
+\pard\pardeftab720\ql\qnatural
+\cf2 Reporter.ReportEvent micDone ,"Button Click" , "Button Name : " & BName\cf0 \
+\pard\pardeftab720\ql\qnatural
+
+\f1\fs32 \cf0 \'a0
+\f0\fs26 \
+\pard\pardeftab720\ql\qnatural
+\cf2 End Function\'a0\'a0\cf0 \
+\pard\pardeftab720\ql\qnatural
+
+\f1\fs32 \cf0 \'a0
+\f0\fs26 \
+\pard\pardeftab720\ql\qnatural
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: Function Fill_WebEdit\u8232 ' Input:\u8232 '\'a0\'a0 ByVal FName As Variant - Name of the Edit field \u8232 '\'a0\'a0 ByVal FValue As Variant - Value to be entered in the field \u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Edit field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Fill an HTML Edit Field \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Fill_WebEdit (\'a0 FName , FValue,Browser_index ,Field_index )\uc0\u8232 '\'a0 Chk_for_esc Fname ' Check if the\'a0 Field name contains\'a0 the character\'a0 ' *'\'a0 if yes appentd the escape character ' / '\'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0\'a0\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").WebEdit("micClass:=WebEdit"\'a0 , "name:="& Fname ,"index:=" & Field_index ).Set FValue\uc0\u8232 \'a0Reporter.ReportEvent micDone ,"Fill Field " , "Field Name : " & FName\'a0 & "\'a0\'a0 ,\'a0\'a0 Field Value\'a0 :\'a0 " & FValue \u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Function Fill_Field\u8232 ' Input:\u8232 '\'a0\'a0 ByVal FName As Variant - Name of the Edit Field \u8232 '\'a0\'a0 ByVal FValue As Variant - Value to be entered in the field \u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Edit field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to fill a SAPEdit Field \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Fill_Field (\'a0 FName , FValue,Page_Type, Browser_index ,Field_index )\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0 If ( Page_Type = "SAPPortal" ) Then \uc0\u8232 \'a0\'a0\'a0\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).SAPPortal("micClass:=SAPPortal").SAPEdit("micClass:=SAPEdit" , "sap attached text:="& Fname ,"index:="\'a0 & Field_index).Set FValue\u8232 \'a0 Else ' If\'a0 the browser\'a0 does not contains SAPPORTAL\'a0 , Find the Edit\'a0 box in\'a0 the Page \u8232 \'a0\'a0\'a0\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").SAPEdit("micClass:=SAPEdit"\'a0 , "sap attached text:="& Fname ,"index:=" & Field_index ).Set FValue\u8232 \'a0\'a0\'a0\'a0 End if \u8232 \'a0Reporter.ReportEvent micDone ,"Fill Field " , "Field Name : " & FName\'a0 & "\'a0\'a0 ,\'a0\'a0 Field Value\'a0 :\'a0 " & FValue \u8232 \'a0 \u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: Function Fill_List\u8232 ' Input:\u8232 '\'a0\'a0 ByVal FName As Variant - Name of the List Field \u8232 '\'a0\'a0 ByVal FValue As Variant - Value to be entered in the field \u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the List field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to fill a SAPList\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Fill_List (\'a0 FName , FValue,Page_Type, Browser_index ,Field_index )\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0 If ( Page_Type = "SAPPortal" ) Then \uc0\u8232 \'a0 'Browser("micClass:=browser", "CreationTime:=" & Browser_index).SAPPortal("micClass:=SAPPortal").SAPList("micClass:=SAPList" , "sap attached text:="& Fname ,"index:="\'a0 & Field_index).Click\u8232 \'a0\'a0\'a0\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).SAPPortal("micClass:=SAPPortal").SAPList("micClass:=SAPList" , "sap attached text:="& Fname ,"index:="\'a0 & Field_index).Select FValue\u8232 \'a0 Else ' If\'a0 the browser\'a0 does not contains SAPPORTAL\'a0 , Find the Edit\'a0 box in\'a0 the Page \u8232 \'a0\'a0\'a0\'a0 'Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").SAPList("micClass:=SAPList"\'a0 , "sap attached text:="& Fname ,"index:=" & Field_index ).Click\u8232 \'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").SAPList("micClass:=SAPList"\'a0 , "sap attached text:="& Fname ,"index:=" & Field_index ).Select FValue\u8232 \'a0End if \u8232 \'a0Reporter.ReportEvent micDone ,"Fill List" , "List Name : " & FName\'a0 & "\'a0\'a0 ,\'a0\'a0 Field Value\'a0 :\'a0 " & FValue \u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Function Click_Link\u8232 ' Input:\u8232 '\'a0\'a0 ByVal LName As Variant - Name of the Link\u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Click a Link\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Click_Link (\'a0 LName ,Page_Type, Browser_index )\uc0\u8232 \'a0\u8232 \'a0If Page_Type = "Page" Then \u8232 \'a0\'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").Link("micClass:=Link","text:=" & LName ).Click\u8232 \'a0Elseif Page_Type = "SAPPortal" then \u8232 \'a0\'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).SAPPortal("micClass:=SAPPortal").Link("micClass:=Link","text:=" & LName,"index:=0" ).Click\u8232 \'a0End if\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0Reporter.ReportEvent micDone ,"Click Link" , "Link Name : " & LName \uc0\u8232 \'a0End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: Function Check_Object\u8232 ' Input:\u8232 '\'a0\'a0 ByVal OType As Variant - Object type. e.g. "Link" OR "Button"\u8232 '\'a0\'a0 ByVal OName As Variant - Name of Object\u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0 True if the object exists , False otherwise \u8232 ' Purpose: This Function is used to Check whether a particular screen object exists on a page\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Check_Object ( OType, OName ,Page_Type, Browser_index )\uc0\u8232 Select Case OType\u8232 \'a0Case "Link"\'a0\u8232 \'a0\'a0\'a0If Page_Type = "Page" Then \u8232 \'a0\'a0\'a0\'a0Flag = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").Link("micClass:=Link","text:=" & OName ).Exist\u8232 \'a0\'a0\'a0Elseif Page_Type = "SAPPortal" then \u8232 \'a0\'a0\'a0\'a0Flag = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).SAPPortal("micClass:=SAPPortal").Link("micClass:=Link","text:=" & OName ).Exist\u8232 \'a0\'a0\'a0End if \u8232 \'a0Case "Button"\u8232 \'a0\'a0\'a0If\'a0 Page_Type = "Page" Then\u8232 \'a0\'a0\'a0\'a0Flag =Browser("micClass:=browser","CreationTime:=" & Browser_index ).Page("micClass:=page").SAPButton("micClass:=SAPButton" ,"name:="& OName,"index:=" & Button_index\'a0 ).Exist \u8232 \'a0\'a0\'a0Else \u8232 \'a0\'a0\'a0\'a0Flag =Browser("micClass:=browser","CreationTime:=" & Browser_index ).SAPPortal("micClass:=SAPPortal").SAPButton("micClass:=SAPButton" ,"name:="& OName,"index:=" & Button_index\'a0 ).Exist \u8232 \'a0\'a0\'a0End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 End Select\uc0\u8232 Check_Object = Flag\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Function Click_WebElement\u8232 ' Input:\u8232 '\'a0\'a0 ByVal WEName As Variant - Name of the WebElement\u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_Index As Variant - Index of the List field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Click a WebElement\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Click_WebElement ( WEName ,Page_Type , Browser_index , Field_Index)\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 \'a0If Page_Type = "Page" Then \u8232 \'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebElement("micClass:=WebElement","innertext:=" & WEName ,"index:=" & Field_Index ).Click\u8232 \'a0Else \u8232 \'a0\'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).SAPPortal("micClass:=SAPPortal").WebElement("micClass:=WebElement","innertext:=" & WEName,"index:=" & Field_Index ).Click\u8232 \'a0End if\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0Reporter.ReportEvent micDone , "Click WebElement"\'a0 , " WebElement Name : "\'a0 & WEName\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Select_Row_In_WebTable\u8232 ' Input:\u8232 '\'a0\'a0 TableText As Variant - Innertext of the table , pass Initial\'a0 part of innertext which does not change in run time \u8232 '\'a0\'a0 ByVal Row_No As Variant -\'a0 Row number to be selected \u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to select a row in a WebTable\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Select_Row_In_WebTable (TableText ,Row_No,Page_Type,Browser_index )\uc0\u8232 Set oDesc = Description.Create\u8232 \'a0oDesc("html tag").value= "TABLE"\u8232 \'a0oDesc("innertext").value = TableText\'a0 & ".*"\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).SAPPortal("micClass:=SAPPortal").WebTable(oDesc).Childitem( Row_No,1,"Image",0 ).Click\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Reporter.ReportEvent micDone ,"Select Row in Table " ,"Table Text : " & TableText\'a0 &\'a0\'a0 "\'a0 ,\'a0 Row No : " & Row_No\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Function Chk_for_esc\u8232 ' Input:\u8232 '\'a0\'a0 ByRef Str As Variant - The string being checked \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Check if the\'a0 Field name contains\'a0 the character\'a0 ' *'\'a0 if yes append the escape character ' / '\'a0 \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Chk_for_esc ( byRef Str)\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0 Dim MyArr\uc0\u8232 \'a0\'a0 MyArr= Split ( Str,"*")\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0 If\'a0 (Ubound (MyArr) = 1)Then\uc0\u8232 \'a0\'a0\'a0 Str = MyArr(0) & "\\*" & MyArr(1)\u8232 \'a0\'a0 End If\u8232 \'a0\'a0 \u8232 \'a0\'a0 \u8232 \'a0End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Navigate\u8232 ' Input:\u8232 '\'a0\'a0 ByVal LName As Variant - Name of the Link to Navigate in the Workarea in SAPPortal\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Click a Link to\'a0 Navigate to a Workarea in SAP Portal \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Navigate(Lname)\uc0\u8232 \'a0\'a0 Browser_index=0\u8232 While (not Browser("micClass:=browser", "CreationTime:=" & Browser_index ).SAPPortal("micClass:=SAPPortal").Exist )\u8232 \'a0wait (1)\u8232 Wend\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Browser("micClass:=browser", "CreationTime:=" & Browser_index ).SAPPortal("micClass:=SAPPortal").Navigate Lname\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Reporter.ReportEvent micDone , "Navigate " , "Workarea Name : "\'a0 & Lname \uc0\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Detail_Navigate\u8232 ' Input:\u8232 '\'a0\'a0 ByVal LName As Variant - Name of the Link to Detail Navigate in the Workarea in SAPPortal\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Click a Link to Detail Navigate to a Workarea in SAP Portal \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Detail_Navigate(Lname, Browser_index )\uc0\u8232 Browser("micClass:=browser", "CreationTime:=" & Browser_index ).SAPPortal("micClass:=SAPPortal").DetailedNavigation Lname\u8232 Reporter.ReportEvent micDone , "Detail Navigate " , "Workarea Name : "\'a0 & Lname\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Verify_Field_Value\u8232 ' Input:\u8232 '\'a0\'a0 ByVal FName As Variant - Name of the Edit field\u8232 '\'a0\'a0 ByVal Expected_Value As Variant - Expected value of the field \u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Edit field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 True : if the expected value matches the actual value\'a0 , False : if\'a0 f the expected value does not match the actual value \u8232 ' Purpose: This Function is used to verify value in an SAPEdit Field \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Verify_Field_Value (\'a0\'a0 FName , Expected_Value ,Page_Type, Browser_index ,Field_index )\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0val= Get_Field_Data (\'a0 FName , Page_Type, Browser_index ,Field_index )\uc0\u8232 \'a0\'a0If ( trim (val)= trim (Expected_value) ) Then\u8232 \'a0\'a0\'a0Verify_Field_Value = True\u8232 \'a0\'a0Else \u8232 \'a0\'a0\'a0Verify_Field_Value = False \u8232 \'a0\'a0End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Get_Field_Data\u8232 ' Input:\u8232 '\'a0\'a0 ByVal FName As Variant - Name of the Edit field\u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Edit field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 Value in the Edit Field\u8232 ' Purpose: This Function is used to verify value in an SAPEdit Field \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Get_Field_Data (\'a0 FName , Page_Type, Browser_index ,Field_index )\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0 If ( Page_Type = "SAPPortal" ) Then \uc0\u8232 \'a0\'a0 Get_Field_Data =\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).SAPPortal("micClass:=SAPPortal").SAPEdit("micClass:=SAPEdit" , "sap attached text:="& Fname ,"index:="\'a0 & Field_index).getroproperty("value")\u8232 \'a0 Else ' If\'a0 the browser\'a0 does not contains SAPPORTAL\'a0 , Find the Edit\'a0 box in\'a0 the Page \u8232 \'a0\'a0 Get_Field_Data =\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").SAPEdit("micClass:=SAPEdit"\'a0 , "sap attached text:="& Fname ,"index:=" & Field_index ).getroproperty("value")\u8232 \'a0End if \u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: Edit_Dropdown_Table\u8232 ' Input:\u8232 '\'a0\'a0 ByVal TableText As Variant - Name of the Table to which the dropdown belongs\u8232 '\'a0\'a0 ByVal RowNumber As Variant - The Row Number at which the dropdwon is located \u8232 '\'a0\'a0 ByVal ColumnName As Variant - The Column Name at which the dropdwon is located\u8232 '\'a0\'a0 ByVal TextValue As Variant - Value to be selected in the dropdown\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Select a dropdown value. This is used when the dropdown box is inside a table\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Edit_Dropdown_Table (\'a0 TableText ,RowNumber\'a0 ,ColumnName,TextValue,Browser_Index )\uc0\u8232 \'a0\'a0 TableText\'a0 = TableText & ".*"\u8232 Set oDes = Description.Create ()\u8232 oDes( "micclass").value = "SAPList"\u8232 Set List_Tables = Browser("micClass:=browser", "CreationTime:=" & Browser_Index ).Page("micClass:=page").WebTable("micclass:=WebTable", "innertext:=" & TableText ).ChildObjects (oDes)\u8232 'msgbox List_Tables.count \u8232 List_Tables(RowNumber - 2).Select TextValue\u8232 Reporter.ReportEvent micDone , "Edit Drop Down" , "Table Name :"\'a0 & TableText & "\'a0 ,\'a0 Row Number : "\'a0 & RowNumber & " , TextValue : "\'a0 & TextValue \u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Find_Row_In_Table\u8232 ' Input:\u8232 '\'a0\'a0 ByVal TableText As Variant - Text of the Header row of the table \u8232 '\'a0\'a0 ByVal ColumnName As Variant - The Column Name at which the value is searched\u8232 '\'a0\'a0 ByVal TextValue As Variant - Value being searched for in the table\'a0 \u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 RowNumber - if the row is found\'a0 ,0 - Iif the value is not\'a0 found in\'a0 the table \u8232 ' Purpose: This Function is used to find a row in table which contains a particular value in a particular column \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 Function Find_Row_In_Table ( TableText\'a0 , ColumnName , TextValue , Browser_Index)\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0 Find_Row_In_Table = 0\'a0 '\'a0 Set the return value to 0 , will be changed later if the value is found\'a0 in the table\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 ' Verify if the Table exists in the page \uc0\u8232 \'a0Set oDesc = Description.Create\u8232 \'a0oDesc("html tag").value= "TABLE"\u8232 \'a0oDesc("innertext").value = TableText\'a0 & ".*"\u8232 \'a0oDesc("index").value = 1\u8232 \'a0\u8232 \'a0If Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).Exist then \u8232 \'a0\'a0'If the table exists , Call function to find the Column number of the Column in the table \u8232 \'a0\'a0\u8232 \'a0\'a0ColumnNumber = Find_ColumnNo_In_Table ( TableText,ColumnName,1)\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0'Scan through the table and find the row number \uc0\u8232 \'a0\'a0RowCount = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).Rowcount\u8232 \'a0\'a0\u8232 \'a0\'a0For\'a0 i= 2 to RowCount\u8232 \'a0\'a0\'a0'Fetch the value from the particular column for a row\u8232 \'a0\'a0\'a0If ( Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).ChilditemCount( i,ColumnNumber,"SAPEdit" ) >0\'a0\'a0 )Then\u8232 \'a0\'a0\'a0\'a0ValueFromTable = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).Childitem( i,ColumnNumber,"SAPEdit",0 ).getroproperty("value")\'a0\'a0\'a0\'a0\'a0\'a0 \u8232 \'a0\'a0\'a0\'a0\u8232 \'a0\'a0\'a0Elseif (\'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).ChilditemCount( i,ColumnNumber,"WebElement" )> 0) then\u8232 \'a0\'a0\'a0\'a0\'a0ValueFromTable = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).Childitem( i,ColumnNumber,"WebElement",0 ).getroproperty("innertext")\'a0\'a0\'a0\'a0\'a0\'a0 \u8232 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0\'a0 'if the value from table matches the value\'a0 specified in\'a0 function call , return the row number \uc0\u8232 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 \u8232 \'a0\'a0\'a0If ( trim (ValueFromTable)= trim (TextValue) )Then\u8232 \'a0\'a0\'a0\'a0Find_Row_In_Table= i\u8232 \'a0\'a0\'a0\'a0Exit For \u8232 \'a0\'a0\'a0End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0Next\uc0\u8232 \'a0\'a0\u8232 Else \u8232 Reporter.ReportEvent 1, "Table not Found" , "Fail"\u8232 End if\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0 \uc0\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: Get_Table_Data\u8232 ' Input:\u8232 '\'a0\'a0 ByVal TableText As Variant - Text of the Header row of the table \u8232 '\'a0\'a0 ByVal RowNumber As Variant - Row number of particular cell\u8232 '\'a0\'a0 ByVal ColumnName As Variant - The Column Name at which the dropdwon is located\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Read data from a SAPEdit field in side a Table\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 Function Get_Table_Data\'a0 (\'a0 TableText ,RowNumber\'a0 ,ColumnName,Browser_Index )\u8232 \'a0\'a0 Set oDesc = Description.Create\u8232 \'a0\'a0 oDesc("html tag").value= "TABLE"\u8232 \'a0oDesc("innertext").value = TableText\'a0 & ".*"\u8232 \'a0oDesc("index").value = 1\u8232 \'a0If Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).Exist then \u8232 \'a0\'a0ColumnNumber = Find_ColumnNo_In_Table ( TableText,ColumnName,1)\u8232 '\'a0\'a0\'a0\'a0\'a0\'a0\'a0 Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).ChildItem ( RowNumber,ColumnNumber,"SAPEdit",0).Set TextValue\u8232 'msgbox\'a0 Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).ChildItem ( RowNumber,ColumnNumber,"SAPEdit",0).Exist\u8232 \'a0\'a0Get_Table_Data = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).ChildItem ( RowNumber,ColumnNumber,"SAPEdit",0).getroproperty ("default value")\u8232 Else \u8232 Reporter.ReportEvent 1, "Table not Found" , "Fail"\u8232 End if \u8232 \'a0End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Edit_Table\u8232 ' Input:\u8232 '\'a0\'a0 ByVal TableText As Variant - Text of the Header row of the table \u8232 '\'a0\'a0 ByVal RowNumber As Variant - Row number of particular cell\u8232 '\'a0\'a0 ByVal ColumnName As Variant - The Column Name at which the dropdwon is located\u8232 '\'a0\'a0 ByVal TextValue As Variant - Value being searched for in the table\'a0 \u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Edit the value in a particular cell of the table , for which Row , column numbers are Known \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Edit_Table (\'a0 TableText ,RowNumber\'a0 ,ColumnName,TextValue,Browser_Index )\uc0\u8232 \'a0\'a0 Set oDesc = Description.Create\u8232 \'a0oDesc("micclass").value="WebTable"\u8232 \'a0\'a0 'oDesc("html tag").value= "TABLE"\u8232 \'a0oDesc("innertext").value = TableText\'a0 & ".*"\u8232 \'a0'oDesc("index").value = 1\u8232 \'a0Set Tables = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").childobjects ( oDesc) \u8232 \'a0If\'a0 Tables.count > 0 Then\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 \'a0 ColumnNumber = Find_ColumnNo_In_Table ( TableText,ColumnName,1)\u8232 \'a0If\'a0 Tables(0).childitemcount ( RowNumber, ColumnNumber , "SAPEdit" ) > 0\'a0 Then\u8232 \'a0\'a0Tables(0).childitem ( RowNumber, ColumnNumber , "SAPEdit",0 ).set TextValue \u8232 \'a0Else \u8232 \'a0Reporter.ReportEvent 1 , "Edit field not found " , "Fail"\'a0\u8232 \'a0End If\u8232 \'a0Else\u8232 \'a0Reporter.ReportEvent 1 , "Table not found " , "Fail"\'a0\u8232 \'a0\u8232 \'a0End If\u8232 Reporter.ReportEvent micDone , "Edit Table "\'a0 , "Table Name : "\'a0 & TableText\'a0 & " , Row : " & RowNumber & " , Column " & ColumnName & " , Value : "\'a0 & TextValue\'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Find_ColumnNo_In_Table\u8232 ' Input:\u8232 '\'a0\'a0 ByVal TableText As Variant - Text of the Header row of the table \u8232 '\'a0\'a0 ByVal ColumnName As Variant - The Column Name at which the dropdwon is located\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 Column Number if Column is present , 0 - if Column is not present in the table\u8232 ' Purpose: This Function is used to Find the Column Number in Table for a particular Column\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 Function Find_ColumnNo_In_Table(TableText, ColumnName, Browser_Index )\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0Set oDesc = Description.Create()\uc0\u8232 \'a0oDesc("micclass").value= "WebTable"\u8232 \'a0oDesc("innertext").value = TableText\'a0 & ".*"\u8232 \'a0\u8232 \'a0 Set Tables = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").childobjects ( oDesc) \u8232 \'a0\'a0If\'a0 Tables.count > 0 Then\u8232 \'a0\'a0\'a0Table_Index = Tables.Count -1 \u8232 \'a0\'a0\'a0\'a0RowCount = Tables(Table_Index).Rowcount \u8232 \'a0End if\u8232 \'a0\u8232 \'a0If\'a0 Tables(Table_Index).ColumnCount (1)>\'a0 1 Then\u8232 \'a0\'a0\'a0 HeaderRow = 1\u8232 \'a0Elseif \'a0Tables(Table_Index).ColumnCount (2)>\'a0 1Then '(Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").WebTable(oDesc).ColumnCount(2) > 1\'a0 ) Then\u8232 \'a0\'a0HeaderRow = 2\u8232 \'a0Else\u8232 \'a0\'a0Reporter.ReportEvent 1, "Table Empty" , "Fail"\u8232 \'a0End If\u8232 \'a0ColumnCount = Tables(Table_Index).ColumnCount(HeaderRow )\u8232 \'a0'MsgBox ColumnCount\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0 '\'a0 Set Tables=Browser("micClass:=browser" , "CreationTime:= 1"\'a0 ).Page("micClass:=Page").ChildObjects(oDesc)\uc0\u8232 \'a0'Msgbox Tables.Count\u8232 \'a0For i= 1 to ColumnCount \u8232 \'a0\'a0If\'a0 ( Tables(Table_Index).GetCellData(HeaderRow,i ) = ColumnName) Then\u8232 \'a0\'a0\'a0Find_ColumnNo_In_Table=i\u8232 \'a0\'a0\'a0Flag_Found = TRUE\u8232 \'a0\'a0\'a0Exit for\u8232 \'a0\'a0End if \u8232 \'a0Next\u8232 \'a0If\'a0 Flag_Found = FALSE Then\u8232 \'a0\'a0Reporter.ReportEvent 1, "Column not Found in Table" , "Fail"\u8232 \'a0End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 End function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Select_Dropdown\u8232 ' Input:\u8232 '\'a0\'a0 ByVal DDName As Variant - Name of the dropdown\u8232 '\'a0\'a0 ByVal DDValue As Variant - Value to be selected in from the Dropdown \u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Dropdown field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Dropdowns with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Select a value in the Dropdown\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Select_Dropdown (DDName, DDValue, Page_Type , Browser_index , Field_Index)\uc0\u8232 \'a0\'a0\'a0\'a0 If ( Page_Type = "SAPPortal" ) Then \u8232 \'a0\'a0\'a0\'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).SAPPortal("micClass:=SAPPortal").SAPDropDownMenu("micClass:=SAPDropDownMenu" , "sap attached text:="& DDName ,"index:="\'a0 & Field_index).Select DDValue\u8232 \'a0 \'a0Else ' If\'a0 the browser\'a0 does not contains SAPPORTAL\'a0 , Find the Edit\'a0 box in\'a0 the Page \u8232 \'a0 Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").SAPDropDownMenu("micClass:=SAPDropDownMenu"\'a0 ,\'a0 "innertext:="& DDName ,"index:=" & Field_index ).Select DDValue\u8232 \'a0End if \u8232 \'a0Reporter.ReportEvent\'a0 micDone , "Select SAPList " ,\'a0 "List Name : " & DDName & "\'a0 , Value : " & DDValue\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Record_Error\u8232 ' Input:\u8232 '\'a0\'a0 ByVal Step_Name As Variant - Name of the Step\u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is Capture the error messages displayed afret Clicking Check in a Document \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Record_Error (Step_Name ,\'a0 Page_Type ,\'a0 Browser_index ) \cf0 \
+\pard\pardeftab720\ql\qnatural
+\cf3 \'a0Set oDesc = Description.Create\
+\'a0oDesc("micclass").Value = "WebTable"\
+\pard\pardeftab720\ql\qnatural
+\cf2 \'a0oDesc("name").value = "Error"\
+\'a0Set Tables=Browser("micClass:=browser" , "CreationTime:=" &\'a0 Browser_index\'a0 ).Page("micClass:=Page").ChildObjects(oDesc)\
+\'a0For i= 0 to Tables.count -1 \
+\'a0\'a0If Tables(i).getroproperty("cols")=5\'a0 Then\
+\'a0\'a0\'a0Reporter.ReportEvent 1,"Error in " & Step_Name\'a0 ,"Error Message : " &\'a0 Tables(i).getroproperty("innertext")\
+\'a0\'a0 End If\
+\'a0\'a0\'a0 Next\
+End Function\cf0 \
+\
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Select_Transaction\u8232 ' Input:\u8232 '\'a0\'a0 ByVal Purchase_document As Variant - Provide Document type. e.g. "COntract" for contracts\u8232 '\'a0\'a0 ByVal Transaction_Type As Variant - Transaction Type E.g. "PCTR" - for purchase contract. \u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 ' Output:\u8232 '\'a0\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to find select a transaction type for a business object\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Select_Transaction\'a0 (Purchase_document, Transaction_Type,\'a0 Browser_index)\uc0\u8232 \'a0\'a0 wait_time\'a0 = Browser("micClass:=browser","CreationTime:=" & Browser_index ).Page("micClass:=page").SAPButton("micClass:=SAPButton" ,"name:=Create","index:=0" & Button_index\'a0 ).Exist (30)\u8232 \'a0Table_Name = Purchase_document & " " & "Type" & Purchase_document &" " & "Type Description" \u8232 \'a0Column_Name = Purchase_document & " " & "Type"\u8232 \'a0Radio_Button = Find_Row_In_Table (Table_Name, Column_Name, Transaction_Type, Browser_index )\'a0 ' Radio Button index starts from "0". Find_Row_In_Table will consider the first row number also. Hence subtract this from 2.\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\'a0\'a0 If Radio_Button > 0 Then \uc0\u8232 \'a0\'a0reporter.ReportEvent 0, "Transaction type selected", "Pass"\u8232 \'a0\'a0Else reporter.ReportEvent 1, "Transaction type not found", "Fail"\u8232 \'a0End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\uc0\u8232 '\'a0Browser("micClass:=browser","CreationTime:=" & Browser_index ).Page("micClass:=page").SAPRadioGroup("micClass:=SAPRadioGroup").Select "#" & Radio_Index\cf0 \
+\cf2 \'a0\cf0 \
+\
+\pard\pardeftab720\ql\qnatural
+\cf3 Set oDesc = Description.Create\
+oDesc("micclass").Value = "WebTable"\
+\pard\pardeftab720\ql\qnatural
+\cf2 oDesc("innertext").value = Table_Name & ".*" \
+Set Tables=Browser("micClass:=browser" , "CreationTime:= 1"\'a0 ).Page("micClass:=Page").ChildObjects(oDesc)\
+Index = Tables.Count -1\cf0 \
+\
+\cf2 \'a0\cf0 \
+\cf2 Tables(Index).childitem ( Radio_Button ,\'a0 1, "WebElement" , 0).click \uc0\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 'Obsolete\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Obsolete_Select_Transaction (Purchase_document, Transaction_Type,\'a0 Browser_index)\uc0\u8232 \'a0\'a0 wait_time\'a0 = Browser("micClass:=browser","CreationTime:=" & Browser_index ).Page("micClass:=page").SAPButton("micClass:=SAPButton" ,"name:=Create","index:=0" & Button_index\'a0 ).Exist (30)\u8232 \'a0Table_Name = Purchase_document & " " & "Type" & Purchase_document &" " & "Type Description" \u8232 \'a0Column_Name = Purchase_document & " " & "Type"\u8232 \'a0Radio_Button = Find_Row_In_Table (Table_Name, Column_Name, Transaction_Type, Browser_index )\'a0 ' Radio Button index starts from "0". Find_Row_In_Table will consider the first row number also. Hence subtract this from 2.\u8232 \'a0If Radio_Button > 0 Then \u8232 \'a0\'a0reporter.ReportEvent 0, "Transaction type selected", "Pass"\u8232 \'a0\'a0Else reporter.ReportEvent 1, "Transaction type not found", "Fail"\u8232 \'a0End If\u8232 \'a0Radio_Index= Radio_Button-2 \u8232 \'a0Browser("micClass:=browser","CreationTime:=" & Browser_index ).Page("micClass:=page").SAPRadioGroup("micClass:=SAPRadioGroup").Select "#" & Radio_Index \u8232 \'a0End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Function Click_Checkbox\u8232 ' Input:\u8232 '\'a0\'a0 ByVal CName As Variant - Name of the Checkbox (sap attached text)\u8232 '\'a0\'a0 ByVal CValue As Variant - The operation to be performed on teh checkbox. "ON" - to Check & "OFF" to un-check\u8232 '\'a0\'a0 ByVal Page_Type As Variant - Specifies the page type ( values "SAPPortal" or "Page" )\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Checkbox field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Checkboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Check/Uncheck a Checkbox\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Click_Checkbox (CName , CValue, Page_Type, Browser_index ,Field_index)\uc0\u8232 \'a0\'a0\'a0 If\'a0 ( Page_Type = "SAPPortal" ) Then \u8232 \'a0\'a0Browser("micClass:=browser", "CreationTime:=" & Browser_index).SAPPortal("micClass:=SAPPortal").SAPCheckBox("micClass:=SAPCheckBox" , "sap attached text:="& CName,"index:=" & Field_index ).Set CValue\u8232 \'a0\'a0Else \u8232 \'a0\'a0Browser("micClass:=browser", "CreationTime:=" & Browser_index).Page("micClass:=page").SAPCheckBox("micClass:=SAPCheckBox"\'a0 , "sap attached text:="& CName ,"index:=" & Field_index ).Set CValue\u8232 \'a0\'a0\'a0 End if \u8232 \'a0Reporter.ReportEvent micDone , "Set Checkbox " ," Checkbox Name : " & CName & "\'a0 , Value : " & CValue\u8232 End Function\u8232 '\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Fill_Field_CTR \u8232 ' Input:\u8232 '\'a0\'a0 ByVal FName As Variant - Name of the Edit Field \u8232 '\'a0\'a0 ByVal FValue As Variant - Value to be entered in the field \u8232 '\'a0\'a0 ByRef Tables As Variant - Array of SAP Edit fields\u8232 '\'a0\'a0 ByVal Browser_index As Variant - Creation tome of the browser ( 0 - for the parent browser , 1,2... - for subsequent browser windows \u8232 '\'a0\'a0 ByVal Field_index As Variant - Index of the Edit field ( 0 - If there is only 1 field\'a0 ,\'a0 1,2.. - If there are 2 or more Editboxes with same name \u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to fill a SAPEdit Field using the the array of Edit Fields\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 Function Fill_Field_CTR (Fname,Fvalue,\'a0 ByRef Tables, Browser_Index, Field_Index) \u8232 \'a0\'a0 Flag =\'a0 False\u8232 If\'a0 (Field_Index > 0) Then\u8232 \'a0\'a0Set oDes = Description.Create ()\u8232 \'a0\'a0oDes( "micclass").value = "SAPEdit"\u8232 \'a0\'a0oDes("readonly").value = 0\u8232 \'a0\'a0oDes("sap attached text").Value = Fname\u8232 \'a0\'a0'oDes ( "sap attached text").value\'a0 = "\\*"\u8232 \'a0\'a0Set Tables2 = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).Page("micClass:=Page").ChildObjects (oDes) \u8232 \'a0\'a0Tables2(Field_Index).set Fvalue\u8232 \'a0\'a0Flag = True\u8232 Else \u8232 \'a0For i=0 to Tables.count-1\u8232 \'a0\'a0\'a0If Tables(i).getroproperty("sap attached text") = Fname\'a0 Then\u8232 \'a0\'a0\'a0\'a0Tables(i).set Fvalue\u8232 \'a0\'a0\'a0\'a0Flag = True\u8232 \'a0\'a0\'a0\'a0Exit for\u8232 \'a0\'a0\'a0End if \u8232 \'a0Next\u8232 End If\'a0\u8232 If Flag = True Then\u8232 \'a0Reporter.ReportEvent micDone\'a0 , "Fill Edit Field " , " Field Name : "\'a0 & FName\'a0 & " , Value " &\'a0 FValue \u8232 \'a0else\u8232 \'a0Reporter.ReportEvent micFail\'a0 , "can not find\'a0 Edit Field " , " Field Name : " &" Fail " '& FName\'a0 & " , Value " &\'a0 FValue \u8232 \'a0\u8232 End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 End Function\'a0\'a0\'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Close_Browsers\u8232 ' Input:\u8232 '\'a0\'a0 None\u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: This Function is used to Close All Browsers \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Close_Browsers ()\uc0\u8232 \'a0\'a0 \u8232 \'a0While Browser( "micclass:=browser" ,"CreationTime:=0").Exist \u8232 \'a0\'a0Browser( "micclass:=browser" ,"CreationTime:=0").Close \u8232 \'a0\'a0\'a0If Browser( "micclass:=browser" ,"CreationTime:=0").Dialog("micclass:=Dialog").WinButton("micclass:=Winbutton" ,"text:=OK").Exist Then\u8232 \'a0\'a0\'a0\'a0Browser( "micclass:=browser" ,"CreationTime:=0").Dialog("micclass:=Dialog").WinButton("micclass:=Winbutton" ,"text:=OK").Click \u8232 \'a0\'a0\'a0End If\u8232 \'a0\'a0\'a0 Wend\u8232 \'a0\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 '=================================================================================================================================================================\uc0\u8232 ' Name: Import_DataTable\u8232 ' Input:\u8232 '\'a0\'a0 ByVal FilePath As Variant - Path of the file\u8232 ' Output:\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: Function to import data table \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function Import_DataTable( FilePath)\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 On Error Resume Next\uc0\u8232 DataTable.Import\'a0 ( FilePath)\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 If\'a0 Err.Number <> 0 Then\uc0\u8232 \'a0Import_DataTable = False\u8232 \'a0Select Case Err.Number\u8232 \'a0\'a0Case "-2147287008"\u8232 \'a0\'a0\'a0'file open\u8232 \'a0\'a0\'a0Reporter.ReportEvent 1,"Can not Import data sheet" , "File open\'a0 by another application"\u8232 \'a0\'a0Case "-2147287038"\u8232 \'a0\'a0\'a0'file not found \u8232 \'a0\'a0\'a0Reporter.ReportEvent 1,"Can not Import data sheet" , "File not found "\u8232 \'a0End Select\u8232 \'a0 \u8232 \'a0 Else \u8232 \'a0 Import_DataTable=True\u8232 End if\u8232 On Error GoTo 0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 End Function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: Select_Rows_In_WebTable\u8232 ' Input:\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 ' Output:\uc0\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: To Select Multilple Rows in webtable \u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 Function Select_Rows_In_WebTable (TableText ,StartRow_No,EndRow_No, Page_Type,Browser_index )\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Set oDesc = Description.Create\uc0\u8232 \'a0oDesc("html tag").value= "TABLE"\u8232 \'a0oDesc("innertext").value = TableText\'a0 & ".*"\u8232 \'a0If Page_Type = "SAPPortal"\'a0 Then\u8232 \'a0\u8232 \'a0Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).SAPPortal("micClass:=SAPPortal").WebTable(oDesc).Childitem( StartRow_No,1,"Image",0 ).Click\u8232 \'a0set Obj = Browser("micClass:=browser" , "CreationTime:=" & Browser_index\'a0 ).SAPPortal("micClass:=SAPPortal").WebTable(oDesc).Childitem( EndRow_No,1,"Image",0 )\u8232 End If\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0PressKey Obj, micShiftDwn \uc0\u8232 \'a0Obj.Click \u8232 \'a0PressKey\'a0 Obj ,micShiftUp\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 end function\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \uc0\u8232 '=================================================================================================================================================================\u8232 ' Name: PressKey\u8232 ' Input:\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 ' Output:\uc0\u8232 '\'a0\'a0\'a0 None\u8232 ' Purpose: To Press a Keybord Key\u8232 ' Remarks: None \u8232 '=================================================================================================================================================================\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 \'a0\cf0 \
+\cf2 Function PressKey(PObj,KeyboardKey)\uc0\u8232 \'a0 ' Option Explicit \u8232 \'a0\'a0 Dim parent\u8232 \'a0\'a0 Dim hwnd\u8232 ' get Browser Object\u8232 \'a0Set parent=PObj.GetTOProperty("parent")\u8232 While(parent.GetTOProperty("micclass") <>"Browser")\u8232 \'a0Set parent=parent.GetTOProperty("parent")\u8232 Wend\u8232 ' translate Browser object to window object\u8232 \'a0hwnd=parent.GetROProperty("hwnd")\u8232 \'a0Window("hwnd:="& hwnd ).WinObject("regexpwndclass:=Internet Explorer_Server").Type KeyboardKey\u8232 End Function\cf0 \
+\cf2 \'a0}

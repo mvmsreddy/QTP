@@ -1,0 +1,69 @@
+{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf540
+{\fonttbl\f0\fnil\fcharset0 Georgia;\f1\fnil\fcharset0 Tahoma;}
+{\colortbl;\red255\green255\blue255;\red0\green13\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww20800\viewh17540\viewkind0
+\deftab720
+\pard\pardeftab720\sl400\sa280\ql\qnatural
+
+\f0\fs28 \cf0 Each scenario that the Subject Matter Expert creates is a business process test. A business process test is composed of a serial flow of components. Each component performs a specific task. A component can pass data to a subsequent component. \uc0\u8232 \u8232 
+\b Understanding Components:
+\b0  Components are easily-maintained reusable scripts that perform a specific task, and are the building blocks from which an effective business process testing structure can be produced. Components are parts of a business process that has been broken down into smaller parts. For example, in most applications users need to log in before they can do anything else. A Subject Matter Expert can create one component that represents the login procedure for an application. Each component can then be reused in different business process {\field{\*\fldinst{HYPERLINK "http://www.softwaretestingstuff.com/2008/11/bpt-methodology-in-qtp-and-quality.html#"}}{\fldrslt \cf2 tests}}, resulting in easier maintenance, updating, and test management. \uc0\u8232 \u8232 Components are comprised of steps. For example, the login component's first step may be to open the application. Its second step could be entering a user name. Its third step could be entering a password, and its fourth step could be clicking the Enter button. \u8232 \u8232 You can create and edit components in QuickTest by adding steps on any supported environment, parameterizing selected items, and enhancing the component by incorporating functions ({\field{\*\fldinst{HYPERLINK "http://www.softwaretestingstuff.com/2008/11/bpt-methodology-in-qtp-and-quality.html#"}}{\fldrslt \cf2 operations}}) that encapsulate the steps needed to perform a particular task. In Quality Center, a Subject Matter Expert creates components and combines them into business process tests, which are used to check that the application behaves as expected. \uc0\u8232 \u8232 
+\b Creating Components in the Quality Center Business Components Module:
+\b0 The Subject Matter Expert can create a new component and define it in the Quality Center Business Components module. The Business Component module includes the following:\uc0\u8232 \u8232 
+\b Details:
+\b0  Provides a general summary of the component's purpose or goals, and the condition of the application before and after a component is run (its pre-conditions and post-conditions).\uc0\u8232 \u8232 
+\b Snapshot:
+\b0  Displays an image that provides a visual cue or description of the component's purpose or operations.\uc0\u8232 \u8232 
+\b Parameters:
+\b0  Specifies the input and output component parameter values for the business component. Implementing and using parameters enables a component to receive data from an external source and to pass data to other components in the business process test flow.\uc0\u8232 \u8232 
+\b Design Steps:
+\b0  Enables you to create or view the manual steps of your business component, and to automate it if required.\uc0\u8232 \u8232 
+\b Automation:
+\b0  Displays or provides access to automated components. For keyword-driven components, enables you to create and modify the steps of your automated business component in a keyword-driven, table format, and provides a plain-language textual description of each step of the implemented component. \uc0\u8232 \u8232 
+\b Used by:
+\b0  Provides details about the business process tests that include the currently selected business component. The tab also includes a link to the relevant business process test in the Test Plan module.\uc0\u8232 \u8232 
+\b Component Requests pane:
+\b0  Enables you to handle new component requests that were generated in the Test Plan module. Component requests are requests to add a {\field{\*\fldinst{HYPERLINK "http://www.softwaretestingstuff.com/2008/11/bpt-methodology-in-qtp-and-quality.html#"}}{\fldrslt \cf2 new business}} component to the project.\uc0\u8232 \u8232 
+\b Implementing Components in QuickTest Professional:
+\b0  Generally, components are created by Subject Matter Experts in Quality Center, although they can also be created and debugged in QuickTest. \uc0\u8232 \u8232 In 
+\b QuickTest
+\b0 , you create components by recording steps on any supported environment or by adding steps manually (if the object repository is populated and the required operations are available). You can parameterize selected items. You can also view and set options specific to components. \uc0\u8232 \u8232 
+\b QuickTest 
+\b0 enables you to create and modify two types of components: business components and scripted components. A business component is an easily-maintained, reusable unit comprising one or more steps that perform a specific task. A scripted component is an automated component that can contain programming logic. Scripted components share functionality with both test actions and business components. For example, you can use the Keyword View, the Expert View, and other QuickTest tools and options to create, view, modify, and debug scripted components in QuickTest. Due to their complexity, scripted components can be edited only in QuickTest. (If needed, you can convert test actions to scripted components. For more information, click the Help button in the Action Conversion Tool window.) \uc0\u8232 \u8232 In 
+\b Quality Center
+\b0 , the Subject Matter Expert can open components created in QuickTest. The Subject Matter Expert can then view and edit business components, but can only view the details for scripted components.\uc0\u8232 \u8232 
+\b Creating Business Process Tests in the Quality Center Test Plan Module: 
+\b0 To create a business process test, the Subject Matter Expert selects (drags and drops) the components that apply to the business process test and configures their run settings. \uc0\u8232 \u8232 Note: When you run a business process test from 
+\b Quality Center
+\b0 , the test run may also be influenced by settings in the QuickTest Remote Agent.\uc0\u8232 \u8232 Each component can be used differently by different business process tests. For example, in each test the component can be configured to use different input parameter values or run a different number of iterations. \u8232 \u8232 If, while creating a business process test, the Subject Matter Expert realizes that a component has not been defined for an element that is necessary for the business process test, the Subject Matter Expert can submit a component request from the Test Plan module.\u8232 \u8232 
+\b Running Business Process Tests and Analyzing the Results:
+\b0  You can use the run and debug options in QuickTest to run and debug an individual component. \uc0\u8232 \u8232 You can debug a business process test by running the test from the Test Plan module in Quality Center. When you choose to run from this module, you can choose which components to run in debug mode. (This pauses the run at the beginning of a component.) \u8232 \u8232 When the business process test has been debugged and is ready for regular test runs, the Subject Matter Expert runs it from the Test Lab module similar to the way any other test is run in Quality Center. Before running the test, the Subject Matter Expert can define run-time parameter values and iterations using the Iterations column in the Test Lab module grid. \u8232 \u8232 From the Test Lab module, you can view the results of the entire business process test run. The results include the value of each parameter, and the results of individual steps reported by QuickTest. \u8232 \u8232 You can click the Open Report link to open the complete QuickTest report. The hierarchical report contains all the different iterations and components within the business process test run.\u8232 \u8232 
+\b Understanding the Differences Between Components and Tests:
+\b0  If you are already familiar with using QuickTest to create action-based tests, you will find that the procedures for creating and editing components are quite similar. However, due to the design and purpose of the component model, there are certain differences in the way you create, edit, and run components. The guidelines below provide an overview of these differences. \uc0\u8232 \u8232 - A component is a single entity. It cannot contain multiple actions or have calls to other actions or to other components.\u8232 \u8232 - When working with components, all external files are stored in the Quality Center project to which you are currently connected.\u8232 \u8232 - The name of the component node in the Keyword View is the same as the saved component. You cannot rename the node.\u8232 \u8232 - Business components are created in the Keyword View, not the Expert View.\u8232 You add resources via the component's {\field{\*\fldinst{HYPERLINK "http://www.softwaretestingstuff.com/2008/11/bpt-methodology-in-qtp-and-quality.html#"}}{\fldrslt \cf2 application}} area, and not directly to the component.\uc0\u8232 \u8232 - Components use custom {\field{\*\fldinst{HYPERLINK "http://www.softwaretestingstuff.com/2008/11/bpt-methodology-in-qtp-and-quality.html#"}}{\fldrslt \cf2 keywords}} created in function libraries to perform operations, such as verifying property values and opening the application you are testing.\
+\
+--------------------\
+\
+
+\itap1\trowd \taflags4 \trgaph108\trleft-108 \trwWidth17720\trftsWidth3 \trbrdrt\brdrnil \trbrdrl\brdrnil \trbrdrt\brdrnil \trbrdrr\brdrnil 
+\clvertalt \clshdrawnil \clwWidth14700\clftsWidth3 \clbrdrt\brdrnil \clbrdrl\brdrnil \clbrdrb\brdrnil \clbrdrr\brdrnil \clpadt200 \clpadl200 \clpadb200 \clpadr200 \gaph\cellx8640
+\pard\intbl\itap1\pardeftab720\sl280\ql\qnatural
+
+\f1\fs22 \cf0 Understandably, Business Process Testing is hard to conceptualize at first, as it shares many familiars parts of QTP and Quality Center.\
+\
+In short, Business Process Testing combines two roles, the Subject Matter Expert (or Business Analyst) and the Automation Engineer, to create reusable Manual, (and then Automated) Components of a test. The SME creates the description and steps of each component, how it operates, it's valid input and expected results. The automation engineer (or the SME) can convert the manual components to simple high level Automated Non-Scripted Components. The automation engineer can use QTP, if necessary, to convert Components to more complex Scripted Components.\
+\
+Business Process Components are created initially in Quality Center, and the tests they comprise are created in a drag and drop building block manner of these components. Similar to Actions, Business Components address a single business aspect of a test, such as Logging In or Performing a Product Search. Like Actions, they support parameters for flexibility and scalability. You might use different User names and passwords, or search for different types of media by title or artist, respectively. Tests are then built by stringing together reusable component modules, reducing maintenance at a modular level, all inside Quality Center.\
+\
+Automated components come in two flavors: Non-Scripted (the default) and Scripted. Non-Scripted Automated Business components can be created from Manual components inside Quality Center, and are just the high level capabilities of QTP, displayed in a view similar to QTP's Keyword View. These Non-Scripted automated components lack the ability to add decision logic. This keeps complexity at a straight forward level, so that non-developers, such as your SME, BA or Manual Testers can create automated components. However, they can be converted to Scripted Components within QTP, where the Automation Engineer can add more complex decision logic in the Expert View.\
+\
+Business Process Testing also includes Application Areas. This is where the additional support functionality of these components are created and managed by the Automation Engineer. This includes the familiar aspects of QTP including the Object Repository, Recovery Scenarios and VBScript Library Files.\
+\
+One advantage of Business Process Testing scripts is that since they retain their manual step descriptions, so they can be executed step by step by a manually tester, even after they have been automated.\
+\
+I hope this helps clarify your understanding of what BPT is, and how it is implemented.\cell \lastrow\row
+\pard\pardeftab720\sl400\sa280\ql\qnatural
+
+\f0\fs28 \cf0 \
+\pard\pardeftab720\sl400\ql\qnatural
+\cf0 \
+}

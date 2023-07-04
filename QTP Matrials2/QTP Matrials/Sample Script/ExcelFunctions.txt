@@ -1,0 +1,35 @@
+'---------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - To Get the Count and sum of distinct fields in an excel sheet (Using Query)
+'Data - Excel Sheet Patn\Name -  C:\Book1.xls with 2 sheets - sheet1 (Columns - Status,Scenario_Name) and sheet2(Columns - Name,Total,Count
+'---------------------------------------------------------------------------------------------------------------------------------------
+
+ 				'Create Connection Object
+				Set sv_objConnAdCn = CreateObject("ADODB.Connection") 
+				'Specify Path Where Excel Sheet is located
+				sv_strDataFile = "C:\Book1.xls" 
+				sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+				sv_objConnAdCn.Open sv_strConnection
+                                'Query To Retrieve Sum and count of Distinct Rows AND Columns
+				sv_strSQL = "SELECT Status,count(*) as Count1 ,sum(Tot) as Total1  FROM [Sheet1$] GROUP BY Status" 
+                		'Create RecordSet Object	
+				Set sv_objRecAdRs = CreateObject("ADODB.Recordset")
+				sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+				'If the configuration file record set is empty the exit run
+				'============================================
+				If sv_objRecAdRs.EOF Then
+				End If
+				'Move through the complete excel sheet records 
+				 sv_objRecAdRs.MoveFirst  
+				'=======================
+                               'Insert the retrieved Columns in different sheet in same excel
+				Do While not  sv_objRecAdRs.EOF  
+				a=sv_objRecAdRs("Status")  
+				'msgbox a
+			        b=sv_objRecAdRs("Total1")  
+				c=sv_objRecAdRs("Count1")  
+                                'Insert New Rows in Sheet
+				strsql =  "INSERT INTO [Sheet2$]  (Name,Total,Count) VALUES ('" & a &"','" & b &"','" & c &"')" 
+				sv_objConnAdCn.Execute (strsql)
+			        sv_objRecAdRs.MoveNext
+							Loop
+'--------------------------------------------------------------------------------------------------------------------------------------------

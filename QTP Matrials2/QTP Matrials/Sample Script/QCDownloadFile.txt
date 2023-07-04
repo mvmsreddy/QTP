@@ -1,0 +1,48 @@
+'-----------------------------------------------------------------------------------------------------------------------
+'This Function downloads the specified file(as an attachment) from Quality Center to Local Path
+'-----------------------------------------------------------------------------------------------------------------------
+
+strInputPath="C:\Automation\Input"
+fname="Emp.xls"
+Call QCDownloadFile(strInputPath,fname)
+
+'-----------------------------------------------------------------------------------------------------------------------
+'Function Name:  QCDownloadFile
+'Function Description: This Function downloads the specified file(as an attachment) from Quality Center to Local Path
+'Function Parameters:  strInputPath - Path of the file that has to be downloaded into Local.
+'		       fname - Name of the file has to be downloaded from QC.
+'-----------------------------------------------------------------------------------------------------------------------
+Function QCDownloadFile(strInputPath,fname)
+'Get the client temp folder - create it if it does not exist 
+	Set flib = CreateObject("Scripting.FileSystemObject") 
+		If Not flib.FolderExists(flib.GetSpecialFolder(2)) Then
+			flib.CreateFolder(flib.GetSpecialFolder(2)) 
+		End If 
+	gstrBuildPath = flib.GetSpecialFolder(2) 
+	Set tdc = QCUtil.TDConnection 
+	Set tm = tdc.TreeManager 
+	Set root = tm.TreeRoot("Subject") 
+	Set folder1=root.FindChildNode("QTP Pilot Demo") 
+	Set folder2=folder1.FindChildNode("QC Sample") 
+	Set folder = folder2.FindChildNode("Input") 
+	Set fact = folder.Attachments 
+	Set alist = fact.NewList("") 
+	'Find the right attachment and download it to the temp folder 
+	For Each att In alist 
+			Set ext = att.AttachmentStorage 
+			attname = att.DirectLink 
+			If InStr(attname,fname) > 0 Then 
+					ext.Load attname, True 
+					'Copy the attachment to a file with the original filename 
+					flib.CopyFile ext.ClientPath & "\" & attname, strInputPath & "\" & fname 
+			Exit For 
+			End If 
+	Next 
+End Function
+
+'Import the downloaded file into the Script
+Datatable.AddSheet "Emp"
+Datatable.ImportSheet strInputPath & "\" & "Emp.xls", 1, "Emp" 
+
+
+

@@ -1,0 +1,25 @@
+'=============================================================================================================================================================
+'Function Group By Class 
+'=============================================================================================================================================================
+Set sv_objConnAdCn5 = CreateObject("ADODB.Connection")
+sv_strResult2 =  g_strMainPath & "\Results\" & g_EBCN&".xls"
+sv_strConnection5="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strResult2 & ";ReadOnly=True;"
+sv_objConnAdCn5.Open sv_strConnection5
+sv_strSQL5  = "SELECT CCP_BILLING_ID as BillingName,sum(CCP_EMPLOYER_CONTRIBUTION) as ER_Premium,Sum(CCP_EMPLOYEE_CONTRIBUTION) as EE_Premium,sum(CCP_EMPLOYEE_POST_TAX_CONTRIBUTION) as EE_Posttax, sum(CCP_EMPLOYEE_PRE_TAX_CONTRIBUTION) as EE_Pretax, Sum(CCP_EMPLOYEE_CONTRIBUTION+CCP_EMPLOYER_CONTRIBUTION+CCP_EMPLOYEE_POST_TAX_CONTRIBUTION+CCP_EMPLOYEE_PRE_TAX_CONTRIBUTION) as Premium  FROM [Result_2$] GROUP BY CCP_BILLING_ID"
+Set sv_objRecAdRs5 = CreateObject("ADODB.Recordset")
+sv_objRecAdRs5.Open sv_strSQL5,sv_objConnAdCn5
+'If the configuration file record set is empty the exit run
+'============================================
+If sv_objRecAdRs5.EOF Then
+End If
+' Moving to the First RecordSet
+sv_objRecAdRs5.MoveFirst
+'===============================================================================
+Do While not  sv_objRecAdRs5.EOF
+sv_EBCN= sv_objRecAdRs5("BillingName")
+
+sv_objRecAdRs5.MoveNext
+Loop
+																				  			   
+
+

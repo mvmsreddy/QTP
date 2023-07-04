@@ -1,0 +1,1202 @@
+'######################################################################################################################################
+'	FUNCTION LIST
+'	*************
+'<Function Name>
+'
+'######################################################################################################################################
+'	Variable declaration
+'	*********************
+'Option Explicit
+Public sv_strMainPathtemp,g_ErrNumber
+Public g_strMainPath,g_strInputPath,g_strOutputPath,g_strIEPath,g_strEnvironment,g_strIservicesITEST1Path,g_strIservicesUAPath
+Public g_Scenario,g_SSN,g_POLICY,g_ASOFDATE,g_CLAIMNO
+Public g_obj,g_fnName,g_HandleError,g_ErrorFlag,g_ErrorSheetPathVal,g_ActionName,g_StartTime,g_EndTime,g_TotalCount,g_ExecCount,g_Errorsnpshot
+Public g_Failsnpshot,g_EmailDestinationPath
+g_Errorsnpshot = "NULL"
+''***************************************************************************************
+'Variable Declaration for the HTML Report
+''***************************************************************************************
+Public Pass_Count,Fail_Count,dtStartTime,Others_Count,Care_Activity,intCAFlag,tmpCAFlag,tmpVarCA
+Public NHS_File_Name,arrTCID(10000),arrPC(10000),arrFC(10000),tmpTCCount,RepSession,arrCA(10000),Build_Environment
+Public tmpPC,tmpFC,tmpStartTime,tmpOC,tmpEndTime,tmpRepCount,ResultPath,ImagePath
+Public g_Date_Time,g_File_Name,g_ReValue,g_FlowFlag
+'================================================================================================================
+'
+'				Function to Get Name
+'
+'================================================================================================================
+Public Function fn_GetName()
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+			Set obj = fn_Object("SwfWindow","NaviLink")
+			Set NaviLinkwin = SwfWindow(obj)
+			sv_UserName_Temp =  NaviLinkwin.GetROProperty("text")
+			If Len(sv_UserName_Temp) <> 0 Then
+				sv_Split_UserName_Temp = Split(sv_UserName_Temp,": ")
+				sv_Split_UserName = sv_Split_UserName_Temp(1)
+				sv_Split_UserName_Temp1 = Split(sv_Split_UserName," ")
+				sv_ArraySize = UBound(sv_Split_UserName_Temp1)
+			
+				sv_Temp_Name = sv_Split_UserName_Temp1(1)
+				For i = 2 to sv_ArraySize
+					sv_Temp_Name = sv_Temp_Name & " " & sv_Split_UserName_Temp1(i)
+				Next
+				sv_Temp_Name = sv_Temp_Name & ", " & sv_Split_UserName_Temp1(0)
+				sv_Len  = Len(sv_Temp_Name)
+				If sv_Len > 24  Then
+					sv_FinalName = Left(sv_Temp_Name,24)
+					fn_GetName = sv_FinalName
+				Else
+					fn_GetName = sv_Temp_Name	
+				End If
+			End If
+End Function
+'================================================================================================================
+'
+'				Sync Function 
+'
+'================================================================================================================
+Public Function SyncWind()
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If SwfWindow("swfname:=CommunicationProxyDialog","regexpwndclass:=WindowsForms10.Window.8.app.0.33c0d9d").Exist(15) Then
+	   For i = 1 to 100
+		   If Not SwfWindow("swfname:=CommunicationProxyDialog","regexpwndclass:=WindowsForms10.Window.8.app.0.33c0d9d").Exist Then
+			   Exit Function
+			Else
+				'
+			End If
+		Next
+    End If
+End Function
+'================================================================================================================
+'
+'				Tree View Exception Handel Function 
+'
+'================================================================================================================
+Public Function TreeViewExcp(sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Call SyncWind()
+	Wait(5)
+	If SwfWindow("Swin_NaviLink").SwfWindow("Swin_Tree_Exception").SwfButton("swfBtn_Continue").Exist(10) Then
+		Call WriteReport("Navigate to the " & sv_Value  & " Tree View Path","Able to navigate to the " & sv_Value  & " Tree View Path","Not able to Navigate to the " & sv_Value  & " Tree View Path","F")
+		SwfWindow("Swin_NaviLink").SwfWindow("Swin_Tree_Exception").SwfButton("swfBtn_Continue").Click
+		TreeViewExcp = 1
+	Else
+		TreeViewExcp = 0
+	End If
+End Function
+'================================================================================================================
+'
+'				Creating the object
+'
+'================================================================================================================
+Public function fn_Object(sv_Object,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+	sv_strDataFile =  g_strMainPath & "\ObjectRepository\ObjectRepository.xls"
+	sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+	sv_objConnAdCn.Open sv_strConnection
+	sv_strSQL= "Select * from [" & sv_Object &"$] where ObjName = '" & sv_Value &"'" 
+	Set sv_objRecAdRs = CreateObject("ADODB.Recordset")
+	sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+	sv_EOFFlag = 0
+'If the configuration file record set is empty the exit run
+'============================================
+	If sv_objRecAdRs.EOF Then
+		sv_EOFFlag = 1
+		fn_UpdateErrorDetails "Input Error","Please check whether the following Object Name - " & sv_Value & " exist in the Sheet - " & sv_Object & ".","","fn_Object","","N","0","Y"
+	End If
+	
+	If sv_EOFFlag = 0 Then
+	' Moving to the First RecordSet
+		sv_objRecAdRs.MoveFirst
+'===============================================================================
+		Do While not  sv_objRecAdRs.EOF
+		
+			Set obj = Description.Create()
+			For sv_inc = 1 to 4
+				sv_Paramtemp = sv_objRecAdRs("Prop" & sv_inc)
+                sv_Valtemp = sv_objRecAdRs("Val" & sv_inc)
+				If sv_Paramtemp <> "" Then
+					obj(sv_Paramtemp).Value = sv_Valtemp
+				End If
+			Next
+			
+			Set fn_Object = obj
+			Set obj = Nothing
+			
+			sv_objRecAdRs.MoveNext
+		Loop
+	End If
+End Function
+'================================================================================================================
+'================================================================================================================
+'
+'								Common Functions
+'
+'================================================================================================================
+''****************************************************************************************************************************************************************
+'Function Name:	SwfHighlight
+'Description : This function is used to highlight the Objects
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfHighlight(obj)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   	If obj.Exist(10)  Then
+		obj.highlight
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End If
+End Function  		
+''***************************************************************************************************************************************************************
+'Function Name: SwfExist
+'Description : This function is used to check the check enable property for all the Objects
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfExist(obj,sv_Value) 
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10)  Then
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name: SwfEnable
+'Description : This function is used to check the check enable property for all the Objects
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfEnable(obj) 
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Dim blnIsEnabled	
+	If obj.Exist  Then
+		blnIsEnabled=obj.getroproperty("enabled")
+		If  blnIsEnabled="True" Then
+			Call WriteReport("Check for "& sv_Value & " Object  Enable",sv_Value & " Object  Enable",sv_Value & " Object  Enable","P")
+            CheckLinkEnable=1
+		Else
+			Call WriteReport("Check for "& sv_Value & " Object  Enable",sv_Value & " Object  Enable",sv_Value & " Object Not Enable","F")
+            CheckLinkEnable=0
+		End If
+	End If	
+End Function
+''***************************************************************************************************************************************************************
+'Function Name: SwfClick
+'Description : This function is used to Click the Respective Object
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfClick(obj,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then 
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+		Wait(5)
+        obj.Click
+		Call WriteReport("Click on the Object "& sv_Value, "Should click on the Object  " & sv_Value ,"Clicked on the Object " & sv_Value,"P")
+	Else
+	   Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+''***************************************************************************************************************************************************************
+'Function Name: SwfDblClick
+'Description : This function is used to Click the Respective Object
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfDblClick(obj,x,y,sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then 
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+				obj.Click x,y,micLeftBtn
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+''***************************************************************************************************************************************************************
+'Function Name: SwfType
+'Description : This function is give the Input for SWF Object
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfType(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then	
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+		wait(5)
+        obj.Type(Val)
+		wait(5)
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfGetValue
+'Description : This function is used to Get the Value(Getroproperty)
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfGetValue(obj,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then	
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+        g_ReValue= obj.GetROProperty("text")
+		SwfGetValue = obj.GetROProperty("text")
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfSet
+'Description : This function is used to Give the Value for SWF EDIT
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfSet(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then	
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+		obj.Set(Val)
+		 wait(5)
+		sv_val  =  obj.GetROProperty("text")
+		If Ucase(sv_val) = Ucase(Val) Then
+			Call WriteReport("Check for "& sv_Value & " Value set are same",sv_Value & " Value set should be same",sv_Value & " Value set are same","P")
+		Else
+			Call WriteReport("Check for "& sv_Value & " Value set are same",sv_Value & " Value set should be same",sv_Value & " Value set are different","F")
+		End If			
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfSelect
+'Description : This function is used to Give the Value for SWF SELECT
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfSelect(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then  
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+		obj.Select(Val)
+		Wait(10)
+		sv_val  =  obj.GetROProperty ("text")
+		If Ucase(sv_val) = Ucase(Val) Then
+			Call WriteReport("Check for "& sv_Value & " Value set are same",sv_Value & " Value set should be same",sv_Value & " Value set are same","P")
+		Else
+			Call WriteReport("Check for "& sv_Value & " Value set are same",sv_Value & " Value set should be same",sv_Value & " Value set are different","F")
+		End If		
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTreeSelect
+'Description : This function is used to select the Give Value in the tree
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTreeSelect(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+            If obj.Exist(10) Then  
+                        Call WriteReport("Check for "& sv_Value & " object is Selected",sv_Value & " object Should be Selected",sv_Value & " object is Selected","P")
+                        obj.Select(Val)
+            wait(5)
+            Else
+                        Call WriteReport("Check for "& sv_Value & " object is Selected",sv_Value & " object Should be Selected",sv_Value & " object is not Selected","F")
+            End if    
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTreeCollapse
+'Description : This function is used to Collapse the Give Value in the tree
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTreeCollapse(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+            If obj.Exist(10) Then  
+				Call WriteReport("Check for "& sv_Value & " object is Collapsed",sv_Value & " object Should be Collapsed",sv_Value & " object is Collapsed","P")
+				obj.Select(Val)
+				obj.Collapse(Val)
+				wait(5)             
+            Else
+				Call WriteReport("Check for "& sv_Value & " object is Collapsed",sv_Value & " object Should be Collapsed",sv_Value & " object is not Collapsed","F")
+            End if    
+End Function
+'*****************************************************************************************************************************************************************
+'Function Name:SwfActivateNode
+'Description : This function is used to activate the Give Value in the tree
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfActivateNode(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then  
+		Call WriteReport("Activate the "& sv_Value & " Object",sv_Value & " Object has to be Activated",sv_Value & " Object is Activated","P")
+		obj.ActivateNode(Val)
+		wait(5)           
+	Else
+		Call WriteReport("Activate the "& sv_Value & " Object",sv_Value & " Object has to be Activated",sv_Value & " Object is not Activated","F")
+	End if    
+End Function
+''***************************************************************************************************
+' Function      : SwfCombo
+' Desctiption   : Verifying the values in the ListBox
+'Author:  Benefits Team
+''***************************************************************************************************
+Public Function  SwfCombo(obj, strInputData)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Dim intRows,intK 
+	If obj.exist Then
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+		intRows = obj.GetROProperty("items count")
+		For intK = 1 to intRows
+			If ucase(trim(obj.GetItem(intK))) = ucase(trim(strInputData)) Then
+				Exit For
+			Elseif  intK=intRows Then
+			End If
+		Next
+	Else
+	Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if
+End function
+'***************************************************************************************************************************************************************
+'Function Name:Set ON the Value
+'Description : This function is used to Give the Value for SWF EDIT
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function Swfcheck(obj,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then	
+		obj.Set "ON"
+		wait(5)
+	End if	
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:Set ON the Radio Button
+' the function is to set on the Radio button
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfRBCheck(obj,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then	
+		obj.Set
+		wait(5)
+	End if	
+End Function
+''****************************************************************************************************************************************************************
+'Function Name: SwfSelectRow
+'Description : This function is used to Select a Row in the table
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfSelectRow(obj,sv_Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If obj.Exist(10) Then	
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+        RowCount = obj.RowCount
+		For  RVal=0 to RowCount-1
+			RVal1 = cint(RVal)
+            val1 = obj.GetCellData (RVal1,1)	
+			If Trim(sv_Val)=trim(val1) Then
+				obj.SelectRow RVal1
+				Exit For
+			End If
+		Next
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+''****************************************************************************************************************************************************************
+'Function Name: SwfGetCell
+'Description : This function is used to Get Cell Data from the table
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfGetCell(obj,strSearchValue,strColName,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+				   Dim intRowCount,blnFlag, strCellValue,i,strVal
+				   blnFlag=0
+				   If obj.Exist Then
+					   Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+					   intRowCount =obj.RowCount
+					   If strSearchValue=Empty Then
+						   Call WriteReport("Check for "& sv_Value & " Object",sv_Value & "  Object Should not be Empty",sv_Value & " Object value is Empty","F")
+                           Exit Function
+					   Else
+					   For i=0 to  intRowCount-1
+						   sv_i = CInt(i)
+							strCellValue=trim(obj.GetCellData(sv_i,strColName))
+							If  LCase(Trim(strCellValue))=LCase(Trim(strSearchValue)) Then
+										blnFlag=1
+										SwfGetCell=strCellValue
+										VerifyCellValue = i+1
+										obj.SelectRow sv_i
+										SwfGetCell = strCellValue
+										Exit for
+										End If
+						Next
+							If blnFlag=1 Then
+							   Call WriteReport("Verify Value From Grid: "&strSearchValue & "Selected",sv_Value & " Selected",sv_Value & " Selected","P")
+							Else
+								   Call WriteReport("Verify Value From Grid: "&strSearchValue & " Selected",sv_Value & " Not Selected",sv_Value & " Not Selected","F")
+									VerifyCellValue=0
+						  End If
+					 End If
+					Else
+							 Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+								 VerifyCellValue=0
+				End if	
+End Function
+''****************************************************************************************************************************************************************
+'Function Name: CloseTabWin
+'Description : This function is used to Close all the Tab's in the Navilink Window
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function CloseTabWin()
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	  Set Obj = fn_Object("SwfWindow","NaviLink")
+	  Set NaviLinkWin = SwfWindow(Obj)
+	  
+	   Set Obj_SwfTab_ClaimTab = fn_Object("SwfTab","ClmFoldUltraTabCtrl")
+	   
+	   If NaviLinkWin.SwfTab(Obj_SwfTab_ClaimTab).Exist(10) Then
+		   Call WriteReport("Verify Existance of Tabs"," Tab(s) are Exists"," Tab(s) are Existed as Expected","P")         
+		   NaviLinkWin.SwfTab(Obj_SwfTab_ClaimTab).SwfExist "Claim Tab(s)"
+		   NaviLinkWin.SwfTab(Obj_SwfTab_ClaimTab).SwfTabClose
+			If SwfWindow("Swin_NaviLink").Dialog("Close Claim Folder").WinButton("OK").Exist(10) Then
+				SwfWindow("Swin_NaviLink").Dialog("Close Claim Folder").WinButton("OK").Click
+			End If
+		Else 
+			Call WriteReport("Verify Existance of Tabs"," No Tab(s) are Exists"," No Tab(s) are Existed as Expected","P")         
+		End If
+End Function
+
+'***************************************************************************************************************************************************************
+'Function Name:SwfSelMenu
+'Description : This function is to Select Menu.
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+	Public Function SwfSelMenu(Obj, sv_Value)
+	   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	   wait(2)
+	   If obj.Exist(10) Then
+		   Obj.DropdownToolbarTool "shellMainMenuToolbar",sv_Value
+		   Call WriteReport("Select "&sv_Value & "From Menu Bar",sv_Value & " Selected",sv_Value & " Selected","P")
+		Else
+			Call WriteReport("Select "&sv_Value & "From Menu Bar",sv_Value & " Not Selected",sv_Value & " Not Selected","F")        
+		End If
+	End Function
+
+'***************************************************************************************************************************************************************
+'Function Name:SwfSelSubMenu
+'Description : This function is to Select SubMenu.
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfSelSubMenu(Obj, sv_Value,sv_Value1)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Wait (2)
+	If obj.Exist(10) Then
+		Obj.ClickMenuTool "shellMainMenuToolbar,"&sv_Value, sv_Value1
+		Call WriteReport("Select "&sv_Value1 & "From Sub Menu ",sv_Value1 & " Selected",sv_Value1 & " Selected","P")
+	Else
+		Call WriteReport("Select "&sv_Value1 & "From Sub Menu ",sv_Value1 & " Not Selected",sv_Value1 & " Not Selected","F")
+	End If
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfClose
+'Description : This function is to Close the Swfwindow
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfClose(Obj, sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+    wait(2)
+	If obj.Exist(10) Then
+		Obj.Close
+		Call WriteReport("Verify "&sv_Value&" Closed",sv_Value & " Closed",sv_Value & " Closed","P")
+	Else
+		 Call WriteReport("Verify "&sv_Value&" Closed",sv_Value & " Closed",sv_Value & " Closed","F")
+	End If
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTabClose
+'Description : This function is used to Close the Tab
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTabClose(Obj)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+    Wait(2)
+   If Obj.Exist(10) Then
+	   TabCnt  = Obj.GetItemsCount
+	   Call WriteReport("Verify Tab(s) Count",TabCnt & " Tab(s) Exist",TabCnt & " Tab(s) Existed","P") 
+	   For i = 0 to TabCnt-1
+		   TabName= Obj.GetItem("0")
+		   Call WriteReport("VErify Tab Name",TabName & " Tab Exist",TabName & " Tab Existed","P") 
+           Obj.CloseTab TabName,micCloseButton
+		   Call WriteReport("VErify Tab Closed",TabName & " Tab Closed",TabName & " Tab Closed","P") 
+		Next
+	Else
+		Call WriteReport("Verify Tab(s) Count",TabCnt & " Tab(s) Exist",TabCnt & " Tab(s) Existed","P")         
+	End If
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTabCount
+'Description : This function is used to retrieve the count of the Tab
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTabCount(Obj, sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Wait(2)
+	If Obj.Exist(10) Then
+		Val = Obj.GetItemsCount
+		Call WriteReport("Get "&sv_Value & "Tab Counts",sv_Value & "Tabs Counted",sv_Value & " Tabs Counted","P")
+	Else
+		Call WriteReport("Get "&sv_Value & "Tab Counts",sv_Value & " No Tab Counts",sv_Value & " No Tab Counts","F")        
+	End If
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTabGetSel
+'Description : This function is used to retrieve the Tab Name
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTabGetSel(Obj, sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	wait(2)
+   If obj.Exist(10) Then
+	   Wait(5)
+	   Obj.GetSelection
+	   Call WriteReport("Select " &sv_Value &" Tab Value",sv_Value & " Tab Value Selected",sv_Value & " TabValue Selected","P")
+	Else
+		Call WriteReport("Select "&sv_Value & " Tab Value",sv_Value & " Tab Value Not Selected",sv_Value & " Tab Value Not Selected","F")        
+	End If
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfDisable
+'Description : This function is used to check whether the object is disabled.
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfDisable(obj,sv_Value) 
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	Dim blnIsEnabled	
+	If obj.Exist  Then
+		blnIsEnabled=obj.getroproperty("enabled")
+		If  blnIsEnabled="False" Then
+			Call WriteReport("Check for "& sv_Value & " Object  Disable",sv_Value & " Object  Enable",sv_Value & " Object  Disable","P")
+            CheckLinkEnable=1
+		Else
+			Call WriteReport("Check for "& sv_Value & " Object  Disable",sv_Value & " Object  Enable",sv_Value & " Object Not Disable","F")
+            CheckLinkEnable=0
+		End If
+	End If	
+End Function
+'''****************************************************************************************************************************************************************
+'Function Name: SwfGetCell
+'Description : This function is used to Get Cell Data from the table
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfGetCell(obj,strSearchValue,strColName,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+				   Dim intRowCount,blnFlag, strCellValue,i,strVal
+				   blnFlag=0
+				   If obj.Exist Then
+					   Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+					   intRowCount =obj.RowCount
+					   If strSearchValue=Empty Then
+						   Call WriteReport("Check for "& sv_Value & " Object",sv_Value & "  Object Should not be Empty",sv_Value & " Object value is Empty","F")
+                           Exit Function
+					   Else
+					   For i=0 to  intRowCount-1
+						   sv_i = CInt(i)
+							strCellValue=trim(obj.GetCellData(sv_i,strColName))
+							If  LCase(Trim(strCellValue))=LCase(Trim(strSearchValue)) Then
+										blnFlag=1
+										SwfGetCell=strCellValue
+										VerifyCellValue = i+1
+										obj.SelectRow sv_i
+										SwfGetCell = strCellValue
+										Exit for
+										End If
+						Next
+							If blnFlag=1 Then
+							   Call WriteReport("Verify Value From Grid: "&strSearchValue & "Selected",sv_Value & " Selected",sv_Value & " Selected","P")
+							Else
+								   Call WriteReport("Verify Value From Grid: "&strSearchValue & " Selected",sv_Value & " Not Selected",sv_Value & " Not Selected","F")
+									VerifyCellValue=0
+						  End If
+					 End If
+					Else
+							 Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+								 VerifyCellValue=0
+				End if	
+End Function
+''****************************************************************************************************************************************************************
+'Function Name:GetTextClick
+'Description : This function is used to Click the Text
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function GetTextClick(Obj,Val)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	intLeft=-1
+	intTop=-1
+	intRight=-1
+	intBottom=-1
+	
+	A=obj.GetTextLocation(Val,intLeft,intTop,intRight,intBottom,0)
+	intXCoordinate=(intRight - intLeft)/2
+	intYCoordinate=(intBottom + intTop)/2
+	
+	obj.DblClick intXCoordinate,intYCoordinate
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTabSelect
+'Description : This function is used to Give the Value for SWF SELECT
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTabSelect(obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	wait(5)
+	If obj.Exist(10) Then  
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+		obj.Select(Val)
+		wait(10)
+		Call SyncWind()
+		wait(15)
+		sv_val = Obj.GetSelection
+		If Ucase(sv_val) = Ucase(Val) Then
+					Call WriteReport("Tab Seleced Should be same","Tab Selected should be " & Val,"Tab Selected is "& sv_val,"P")
+		Else
+					Call WriteReport("Tab Seleced Should be same","Tab Selected should be " & Val,"Tab Selected is "& sv_val,"F")
+		End If                
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if    
+End Function
+'***************************************************************************************************************************************************************
+'Function Name:SwfTbarClick
+'Description : This function is used to Give the Value for SWF SELECT
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfTbarClick(Obj,Val,sv_Value)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If Obj.Exist(10) Then
+	   Obj.ClickToolbarTool Val, sv_Value
+	   Call WriteReport("Click on "& sv_Value, sv_Value & " is Clicked",sv_Value & " is Clicked as Expected","P")
+	Else
+		Call WriteReport("Click on "& sv_Value, sv_Value & " is Not Clicked",sv_Value & " is Not Clicked as Expected","F")
+   End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SyncWindow
+'Description : This function is used to Give the Value for SWF SELECT
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SyncWindow()
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	set oDesc = Description.Create() 
+	    oDesc("micclass").Value = "SwfWindow" 
+	    'Below class vary depends on window applicaiton
+	    oDesc("regexpwndclass").Value = "HTML Application Host Window Class" 
+	Set oChild = SwfWindow("swfname:=ShellForm","regexpwndclass:=WindowsForms10.Window.8.app.0.33c0d9d").ChildObjects(oDesc)
+	    oChildCount = oChild.count
+		'If we have only one window opened in Desktop.
+		If  oChildCount = 1 Then
+			For i = 0 to 5
+				strStatus = SwfWindow(oDesc).GetRoProperty("enabled")
+				If strStatus = True Then
+					Reporter.ReportEvent micPass,"micPass","value in " & i
+					Exit For
+				End If
+			Next
+		End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfGetAllItemsValue
+'Description : This function is used to Get all items Value(Getroproperty)
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfGetAllItemsValue(obj,sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If 
+
+	If obj.Exist(10) Then	
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does Exist","P")
+        g_ReValue= obj.GetROProperty("all items")
+		SwfGetAllItemsValue=g_ReValue
+	Else
+		Call WriteReport("Check for "& sv_Value & " Object",sv_Value & " Object Exist",sv_Value & " Object does not Exist","F")
+	End if	
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfSpltDte
+'Description : This function is used Split the date with the Delimiter as "/"
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfSpltDte(Obj,sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If Obj.Exist(10) Then
+	   Val = Obj.GetRoProperty("text")
+	   SpltVal = Split(Val,"/")
+	   SwfSpltDte = SpltVal
+	Else
+'
+   End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfSplt
+'Description : This function is used Split the values based on the Delimiter
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfSplt(Obj,Delimiter,sv_Value)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If Obj.Exist(10) Then
+	   Val = Obj.GetRoProperty("text")
+	   SpltVal = Split(Val,Delimiter)
+	   SwfSplt = SpltVal
+	Else
+'	
+   End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfIsChecked
+'Description : This function is used check whether the Radio Button is Checked
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfIsChecked(Obj,RdBtn_Name)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+
+    If Obj.Exist(10) Then
+		Call WriteReport("Check "&RdBtn_Name&" Existance",RdBtn_Name&" Exist's",RdBtn_Name &" Exist's as Expected","P")
+		ChkStat = Obj.GetRoProperty("Checked")
+		If ChkStat = True Then
+			Call WriteReport("Check "&RdBtn_Name&" Status",RdBtn_Name&" is Checked",RdBtn_Name &" is Checked as Expected","P")
+		Else
+			Call WriteReport("Check "&RdBtn_Name&" Status",RdBtn_Name&" is Not Checked",RdBtn_Name &" is Not Checked as Expected","F")
+		End If
+	Else
+		Call WriteReport("Check "&RdBtn_Name&" Existance",RdBtn_Name&" is not Existed",RdBtn_Name &" Existed as Expected","F")
+	End If
+	SwfIsChecked = ChkStat
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfRwCnt
+'Description : This function is used verify the Row Count
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfRwCnt(Obj)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If Obj.Exist(10) Then
+	   RwCnt = Obj.RowCount
+	   If RwCnt > 0 Then
+		   SwfRwCnt = RwCnt
+		   Call WriteReport("Verify Row Count","Row Count is Greater than ZERO","Row Count is Greater than ZERO as Expected","P")
+		Else
+			Call WriteReport("Verify Row Count","Row Count is Not Greater than ZERO","Row Count is Not Greater than ZERO as Expected","P")
+	   End If
+   End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfActRwVal
+'Description : This function is used to select a Row from a Table and pull the value
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfActRwVal(Obj)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+
+   If Obj.Exist(10) Then
+		wait(5)
+	   GrdCnt = Obj.RowCount
+	   RwNum = Cint(RandomNumber(0,GrdCnt-1))
+
+'	   MsgBox RwNum
+	   Obj.ActivateRow Cint(RwNum)
+	   Obj.SelectRow(RwNum)
+	   Call WriteReport("Verify "&RwNum&" is Selected or Not",RwNum&" is Selected",RwNum&" is Selected as Expected","P")
+	   CellVal = Obj.GetCellData(RwNum,1)
+	   Call WriteReport("Verify "&RwNum&" Row Value",RwNum&" Row Value is "&CellVal,RwNum&" Row Value is "&CellVal&" as Expected","P")
+
+	   SwfActRwVal = CellVal
+	Else
+		Call WriteReport("Verify "&RwNum&" is Selected or Not",RwNum&" is Not Selected",RwNum&" is Selected as Expected","F")
+		Call WriteReport("Verify "&RwNum&" Row Value",RwNum&" Row Value is not "&CellVal,RwNum&" Row Value is not "&CellVal&" as Expected","F")
+
+   End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name:SwfChkVal
+'Description : This function is used to check for the deleted claim Value
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfChkVal(Obj,SrhVal)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+   If Obj.Exist(10) Then
+       RwCnt = Obj.RowCount
+       
+	   For i = 0 to Cint(RwCnt)-1
+           GrdVal = Obj.GetCellData(Cint(i),1)
+       	   If Not Trim(SrhVal) = Trim(GrdVal) Then
+			   GrdStat = "Pass"
+			Else
+				GrdStat = "Fail"
+			End If			
+		Next
+		If GrdStat = "Pass" Then
+			Call WriteReport("Check for Deleted Claim Contact",SrhVal&" Contact is Delected",SrhVal&" Contact is Delected as Expected","P")
+			SwfChkVal = "Pass"
+		Else
+			Call WriteReport("Check for Deleted Claim Contact",SrhVal&" Contact is not Delected",SrhVal&" Contact is not Delected as Expected","F")
+			SwfChkVal = "Fail"
+        End If
+
+	End If
+End Function
+''***************************************************************************************************************************************************************
+'Function Name: Recovery Action
+'Description : This function is used Come out the current action
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function fn_RecoveryAction()
+   If  Err.Number <> 0 OR g_ErrNumber <> 0 Then
+		ExitAction
+   End If
+End Function
+''****************************************************************************************************************************************************************
+'Function Name:SwfGetItmCnt
+'Description : This function is used to get the item count from the Combobox
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfGetItmCnt(Obj, ComboNme)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If Obj.Exist(10) Then
+		CntVal = Obj.GetItemsCount()
+		Call WriteReport("Verify Count of "&ComboNme,ComboNme&"Count is "&CntVal,ComboNme&"Count is "&CntVal&" as Expected","P")
+	Else
+		Call WriteReport("Verify Count of "&ComboNme,ComboNme&"Count is Not"&CntVal,ComboNme&"Count is Not"&CntVal&" as Expected","F")
+	End If
+		SwfGetItmCnt = CntVal
+End Function
+''****************************************************************************************************************************************************************
+'Function Name:SwfChkVal
+'Description : This function is used to get the Selected value from the combo box
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function SwfGetSel(Obj)
+	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	If Obj.Exist(10) Then
+		Combval = Obj.GetSelection
+		Call WriteReport("Verify Combo Value","Combo Value is" &Combval,"Combo Value is" &Combval&" as Expected","P")
+	Else      
+		Call WriteReport("Verify Combo Value","Combo Value is Not " &Combval,"Combo Value is Not " &Combval&" as Expected","F")
+	End If
+	SwfGetSel = Combval
+End Function
+''****************************************************************************************************************************************************************
+'Function Name:fn_SendMail()
+'Description : This function is used to Send Email to the required receipent after the execution got completed
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function fn_SendMail()'pramFrom,pramTo,pramCC,pramBCC,pramSubject,pramBody,pramHTMLBody)
+   	If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+
+	Dim objOutlook_Os 'As Object
+	Dim objOutlookMsg_Os 'As Object
+	Set objOutlook_Os = CreateObject("Outlook.Application")
+	Set objOutlookMsg_Os = objOutlook_Os.CreateItem(0)
+	With objOutlookMsg_Os
+	   .SentOnBehalfOfName = "QACoEAutomationTeam@unum.com"
+		.To = "DIZ07;CKH08;PRREP;$CDAJ;$ndrf;CBS8Q;CBS6V;CBS5L"
+		.Cc = "DHM08;CBS9V;DMN08"
+'		.Bcc =
+		.Subject = "Navilink UI Execution Summary - " & Ucase(g_strEnvironment) & " Environment"
+		sv_Scenario_Result = fn_Scenarioresult()
+		.Body = "Hello," & VbCrLf & VbCrLf & " The NavilinkUI Scripts have completed execution on " & Ucase(g_strEnvironment) & " environment. The results summary is found at -" & VbCrLf & VbCrLf & "file:\\" & g_EmailDestinationPath & VbCrLf & "Execution Details :" & sv_Scenario_Result &VbCrLf & VbCrLf & " Please move your reports to a secure location for review and storage"& VbCrLf & VbCrlf & " ***THIS IS AN AUTO GENERATED MAIL. PLEASE DO NOT REPLY.***""" & VbCrLf & VbCrLf & "THANKS, "& VbCrLf & "QA CoE BENEFIT AUTOMATION TEAM."
+                                  
+ '                       .HTMLBody = pramHTMLBody
+'                                    .Attachments.Add ("c:\Sending_Mail.txt")
+	   .Send 'Let´s go!
+	End With                                   
+	Set objOutlookMsg_Os = Nothing
+	Set objOutlook_Os = Nothing
+End Function
+'****************************************************************************************************************************************************************
+'Function Name:fn_Scenarioresult()
+'Description : This function is used to  for the reporting the execution details in the Email
+'Author :Benefits Team
+''****************************************************************************************************************************************************************
+Public Function fn_Scenarioresult()
+   If  UCase(g_HandleError) = "YES" Then
+		On Error resume next 
+	End If
+	sv_strDataFile = g_strInputPath & "\INPUT.xls"
+
+	Const ForReading = 1 
+	Const ForWriting = 2 
+	Const ForAppending = 8 
+	Const TristateUseDefault = -2 
+	Const TristateTrue = -1 
+	Const TristateFalse = 0 
+	
+	Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+	sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+	sv_objConnAdCn.Open sv_strConnection
+
+	sv_strSQL= "Select * from [USERINPUT$] where UCASE(TO_BE_EXECUTED) = 'YES'" 
+	Set sv_objRecAdRs = CreateObject("ADODB.Recordset")
+	sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+	sv_EOFFlag = 0
+	'If the configuration file record set is empty the exit run
+	'============================================
+	If sv_objRecAdRs.EOF Then
+		sv_EOFFlag = 1
+		On error goto 0 	
+	End If
+	
+	If sv_EOFFlag = 0 Then
+		' Moving to the First RecordSet
+		sv_objRecAdRs.MoveFirst
+		sv_temp_String = vbCrlf & vbTab & "Scenario Name" & vbTab & "Pass Count" & vbTab & "Fail Count" & vbTab & "Total Count"
+	'===============================================================================
+		Do While not  sv_objRecAdRs.EOF
+			sv_Scenario = sv_objRecAdRs("SCENARIO")	
+
+		   Set oFS = CreateObject("Scripting.FileSystemObject") 
+		   sFilePathAndName = g_EmailDestinationPath  & sv_Scenario & ".html"
+		   Set oFile = oFS.GetFile(sFilePathAndName) 
+		   If oFS.FileExists(sFilePathAndName) = True Then
+				Set oStream = oFile.OpenAsTextStream(ForReading, TristateUseDefault) 
+				Do While Not oStream.AtEndOfStream 
+					sRecord=oStream.ReadLine 
+				   sv_WorkPackage_loci= instr(sRecord,"Work Package : ")
+					If sv_WorkPackage_loci > 0 Then
+						sv_temp_passcount = sv_WorkPackage_loci + 14
+						sv_Passcount_loc1i = instr(sv_temp_passcount,sRecord," <DIV ")
+						sv_templen = sv_Passcount_loc1i - sv_temp_passcount
+						sv_PassCount_Val = mid(sRecord,sv_temp_passcount,sv_templen)
+						sv_temp_String = sv_temp_String & vbCrlf & vbTab & sv_PassCount_Val
+					End If
+					sv_Passcount_loci= instr(sRecord,"Pass Count : ")
+					If sv_Passcount_loci > 0 Then
+						sv_temp_passcount = sv_Passcount_loci + 12
+						sv_Passcount_loc1i = instr(sv_temp_passcount,sRecord," <DIV ")
+						sv_templen = sv_Passcount_loc1i - sv_temp_passcount
+						sv_PassCount_Val = mid(sRecord,sv_temp_passcount,sv_templen)
+						sv_temp_String = sv_temp_String & vbTab & vbTab & sv_PassCount_Val
+					End If
+					sv_Failcount_loci= instr(sRecord,"Fail Count : ")
+					If sv_Failcount_loci > 0 Then
+						sv_temp_passcount = sv_Failcount_loci + 12
+						sv_Passcount_loc1i = instr(sv_temp_passcount,sRecord," <DIV ")
+						sv_templen = sv_Passcount_loc1i - sv_temp_passcount
+						sv_PassCount_Val = mid(sRecord,sv_temp_passcount,sv_templen)
+						sv_temp_String = sv_temp_String & vbTab & vbTab & sv_PassCount_Val
+					End If
+					sv_Totalcount_loci= instr(sRecord,"Total Count : ")
+					If sv_Totalcount_loci > 0 Then
+						sv_temp_passcount = sv_Totalcount_loci + 13
+						sv_Passcount_loc1i = instr(sv_temp_passcount,sRecord," <DIV ")
+						sv_templen = sv_Passcount_loc1i - sv_temp_passcount
+						sv_PassCount_Val = mid(sRecord,sv_temp_passcount,sv_templen)
+						sv_temp_String = sv_temp_String & vbTab & vbTab & sv_PassCount_Val' & vbCrlf
+						Exit Do
+					End If
+				 Loop 
+			End If
+			 oStream.Close 
+			 sv_objRecAdRs.MoveNext
+		Loop
+	 End If
+	 fn_Scenarioresult = sv_temp_String
+End Function     
+''****************************************************************************************************************************************************************
+'
+'					Registering the functions
+'
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfObject","SwfExist","SwfExist",True
+RegisterUserFunc "SwfObject","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfObject","SwfClick","SwfClick",True
+RegisterUserFunc "SwfObject","SwfType","SwfType",True
+RegisterUserFunc "SwfObject","SwfGetValue","SwfGetValue",True
+RegisterUserFunc "SwfObject","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfObject","SwfDblClick","SwfDblClick",True
+RegisterUserFunc "SwfObject","GetTextClick","GetTextClick",True
+''*************************************************************************************************************************************************************										
+RegisterUserFunc "SwfEdit","SwfExist","SwfExist",True
+RegisterUserFunc "SwfEdit","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfEdit","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfEdit","SwfDisable","SwfDisable",True
+RegisterUserFunc "SwfEdit","SwfSet","SwfSet",True
+RegisterUserFunc "SwfEdit","SwfGetValue","SwfGetValue",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfEditor","SwfExist","SwfExist",True
+RegisterUserFunc "SwfEditor","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfEditor","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfEditor","SwfType","SwfType",True
+RegisterUserFunc "SwfEditor","SwfGetValue","SwfGetValue",True
+RegisterUserFunc "SwfEditor","SwfSet","SwfSet",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfComboBox","SwfExist","SwfExist",True
+RegisterUserFunc "SwfComboBox","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfComboBox","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfComboBox","SwfSelect","SwfSelect",True
+RegisterUserFunc "SwfComboBox","SwfGetValue","SwfGetValue",True
+RegisterUserFunc "SwfComboBox","SwfDisable","SwfDisable",True
+RegisterUserFunc "SwfComboBox","SwfGetAllItemsValue","SwfGetAllItemsValue",True
+RegisterUserFunc "SwfComboBox","SwfGetItmCnt","SwfGetItmCnt",True
+RegisterUserFunc "SwfComboBox","SwfGetSel","SwfGetSel",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfCheckBox","SwfExist","SwfExist",True
+RegisterUserFunc "SwfCheckBox","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfCheckBox","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfCheckBox","Swfcheck","Swfcheck",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfRadioButton","SwfExist","SwfExist",True
+RegisterUserFunc "SwfRadioButton","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfRadioButton","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfRadioButton","SwfIsChecked","SwfIsChecked",True
+RegisterUserFunc "SwfRadioButton","SwfRBCheck","SwfRBCheck",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfTable","SwfExist","SwfExist",True
+RegisterUserFunc "SwfTable","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfTable","SwfGetCell","SwfGetCell",True
+RegisterUserFunc "SwfTable","SwfSelectRow","SwfSelectRow",True
+RegisterUserFunc "SwfTable","SwfRwCnt","SwfRwCnt",True
+RegisterUserFunc "SwfTable","SwfActRwVal","SwfActRwVal",True
+RegisterUserFunc "SwfTable","SwfChkVal","SwfChkVal",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfButton","SwfExist","SwfExist",True
+RegisterUserFunc "SwfButton","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfButton","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfButton","SwfClick","SwfClick",True
+RegisterUserFunc "SwfButton","SwfDblClick","SwfDblClick",True
+RegisterUserFunc "SwfButton","SwfSplt","SwfSplt",True
+RegisterUserFunc "SwfButton","SwfDisable","SwfDisable",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfListView","SwfExist","SwfExist",True
+RegisterUserFunc "SwfListView","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfListView","SwfEnable","SwfEnable",True
+RegisterUserFunc "SwfListView","SwfSelect","SwfSelect",True
+RegisterUserFunc "SwfListView","SwfGetValue","SwfGetValue",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfTreeView","SwfExist","SwfExist",True
+RegisterUserFunc "SwfTreeView","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfTreeView","SwfTreeSelect","SwfTreeSelect",True
+RegisterUserFunc "SwfTreeView","SwfTreeCollapse","SwfTreeCollapse",True
+RegisterUserFunc "SwfTreeView","SwfActivateNode","SwfActivateNode",True
+RegisterUserFunc "SwfTreeView","SwfSelect","SwfSelect",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfTab","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfTab","SwfTabSelect","SwfTabSelect",True
+RegisterUserFunc "SwfTab","SwfExist","SwfExist",True
+RegisterUserFunc "SwfTab","SwfClick","SwfClick",True
+RegisterUserFunc "SwfTab","SwfSelect","SwfSelect",True
+RegisterUserFunc "SwfTab","SwfTabClose","SwfTabClose",True
+RegisterUserFunc "SwfTab","SwfTabGetSel","SwfTabGetSel",True
+RegisterUserFunc "SwfTab","SwfTabCount","SwfTabCount",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "WinObject","SwfExist","SwfExist",True
+RegisterUserFunc "WinObject","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "WinObject","SwfType","SwfType",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfWindow","SwfExist","SwfExist",True
+RegisterUserFunc "SwfWindow","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "SwfWindow","SwfClose","SwfClose",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfToolbar","SwfExist","SwfExist",True
+RegisterUserFunc "SwfToolbar","SwfSelMenu","SwfSelMenu",True
+RegisterUserFunc "SwfToolbar","SwfSelSubMenu","SwfSelSubMenu",True
+RegisterUserFunc "SwfToolbar","SwfTbarClick","SwfTbarClick",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "Dialog","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "Dialog","SwfClick","SwfClick",True
+RegisterUserFunc "Dialog","SwfExist","SwfExist",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "WinButton","SwfExist","SwfExist",True
+RegisterUserFunc "WinButton","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "WinButton","SwfEnable","SwfEnable",True
+RegisterUserFunc "WinButton","SwfClick","SwfClick",True
+RegisterUserFunc "WinButton","SwfDblClick","SwfDblClick",True
+RegisterUserFunc "WinButton","SwfSplt","SwfSplt",True
+RegisterUserFunc "WinButton","SwfDisable","SwfDisable",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "SwfCalendar","SwfSpltDte","SwfSpltDte",True
+RegisterUserFunc "SwfCalendar","SwfGetValue","SwfGetValue",True
+''****************************************************************************************************************************************************************
+RegisterUserFunc "Window","SwfExist","SwfExist",True
+RegisterUserFunc "Window","SwfHighlight","SwfHighlight",True
+RegisterUserFunc "Window","SwfClose","SwfClose",True
+''****************************************************************************************************************************************************************

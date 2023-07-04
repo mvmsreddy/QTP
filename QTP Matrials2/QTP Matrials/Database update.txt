@@ -1,0 +1,68 @@
+Call DetailsUpdate("A","B",Time,Time,"E","UAT")
+
+
+
+'===============================================================================================================================================================
+'Function Name	:DetailsUpdate
+'Parameters	:ScriptID,ScriptName,StartTime,EndTime,Desc,TEnvironment
+'Desc	:To update execution details in Data Base - Table Name - - DetailsofExecutionTest
+'===============================================================================================================================================================
+Public Function DetailsUpdate(ScriptID,ScriptName,StartTime,EndTime,Desc,TEnvironment)
+			'======================================get user name======================
+			strComputer = "."
+			Set objWMIService = GetObject("winmgmts:" _
+				& "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2") 
+			Set colComputer = objWMIService.ExecQuery _
+				("Select * from Win32_ComputerSystem")
+			For Each objComputer in colComputer
+			   UserName =  objComputer.UserName
+			Next
+			'======================================get machine name======================
+			set wshnetwork=createobject("wscript.network")
+			MachineName=wshnetwork.computername
+			set wshnetwork=nothing
+			'=====================================Get Total Time==========================
+            TotalTime = UDF_getTotalTime(StartTime,EndTime)
+            sv_Date = Date
+						Dim sv_objConnAdCn, sv_strDataFile, sv_strConnection
+						Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+						sv_strConnection="Provider=SQLOLEDB;Data Source=CAEvQACOE01;Integrated Security=SSPI;Initial Catalog=UNUMECDB;"
+						sv_objConnAdCn.Open sv_strConnection
+						 strsql = "Insert into DetailsOfExecutionTest(ScriptID,ScriptName,Environment,ExecutedBy,MachineIP,Date,TotalTime,StartTime,EndTime,TotalRecords,TotalRecordsExecuted,Description) Values('" & ScriptID & "','" & ScriptName & "','" & TEnvironment & "','" & UserName & "','" & MachineName & "','" & sv_Date & "','" & TotalTime & "','" & StartTime & "','" & EndTime & "','" & TotalRecords & "','" & TotalRecordsExecuted & "','" & Desc & "')"
+						sv_objConnAdCn.Execute (strsql)
+						sv_objConnAdCn.close
+						Set sv_objConnAdCn = Nothing
+End Function
+
+Public Function UDF_getTotalTime(ByVal startTime, ByVal endTime)
+        Dim strTimeDiff, strSec, strMins, strHrs, strTotalTimeTaken
+        strTimeDiff = DateDiff("s", CDate(startTime), CDate(endTime))
+        strSec = CInt(strTimeDiff Mod 60)
+        strMins = CInt((strTimeDiff - strSec) / 60)
+        strHrs = CInt(strMins - (strMins Mod 60)) / 60
+        strMins = CInt(strMins) Mod 60
+
+        If (Len(strSec) < 2) Then
+            If (strSec = "") Then
+                strSec = "00"
+            Else
+                strSec = "0" & strSec
+            End If
+        End If
+        If (Len(strMins) < 2) Then
+            If (strMins = "") Then
+                strMins = "00"
+            Else
+                strMins = "0" & strMins
+            End If
+        End If
+        If (Len(strHrs) < 2) Then
+            If (strHrs = "") Then
+                strHrs = "00"
+            Else
+                strHrs = "0" & strHrs
+            End If
+        End If
+        strTotalTimeTaken = strHrs & ":" & strMins & ":" & strSec
+        UDF_getTotalTime = strTotalTimeTaken
+End Function

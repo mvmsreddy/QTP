@@ -1,0 +1,5 @@
+ssn="112-12-1234"
+a=Split(ssn,"-")
+
+Set WshShell = CreateObject("WScript.Shell") 
+WshShell.Popup  a(0), 5, "Test" 

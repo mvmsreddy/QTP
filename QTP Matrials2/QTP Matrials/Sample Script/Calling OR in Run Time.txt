@@ -1,0 +1,16 @@
+''==================================================================================================================================
+'#Function Name   : UDF_ORUpdate()
+'#Description     : The function parameterize the specified Object Repository file in Run Time. 
+'#Input Parameters: sv_ActName,sv_qtFileName                     
+'#Return Values   : None                 
+'==================================================================================================================================
+
+Public Function UDF_ORUpdate(g_ActName,sv_qtFileName)
+    Dim qtApp
+    Dim qtRepositories
+    Set qtApp = CreateObject("QuickTest.Application") 
+    Set qtRepositories = qtApp.Test.Actions(g_ActName).ObjectRepositories
+    qtRepositories.removeall
+    qtRepositories.Add sv_qtFileName
+
+End Function

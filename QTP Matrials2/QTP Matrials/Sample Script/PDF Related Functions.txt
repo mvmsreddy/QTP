@@ -1,0 +1,266 @@
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - Used to get a string of text from specified page in PDF,the string is returned  relative 
+'                     to searched string , ie if we are searching for stirnfg 'Policy Holder',function returns 
+'                     complete text in  line which has 'Policy  Holder 'in it (First Occurance)
+'strPath - Path of PDF  file,strPageNumber- Page Number in which Text is expected in strSearchText- Text to be searched for (eg'Policy Number')
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Function fg_GetStringPDF(strPath,strPageNumber,strSearchText)
+    strPageNum = strPageNumber - 1
+    Dim PDDoc 
+    Dim CAcroRect 
+    Dim PDPage 
+    Dim PDTxtSelect
+    Dim CArcoPoint
+    
+    Dim sPgTxt 
+    Dim iNumWords 
+    
+    Dim arPdfLines
+    
+    Dim i
+    
+	
+    'Load the PDF File
+    Set PDDoc = CreateObject( "AcroExch.PDDoc" )
+    If PDDoc.Open(strPath) Then
+       ' Zero = the 1st page
+        Set PDPage = PDDoc.AcquirePage(strPageNum)   
+        Set CArcoPoint = PDPage.GetSize()                               
+		Set CAcroRect = CreateObject("AcroExch.Rect")
+
+        
+        ' set the selected text area to the size of the page
+        CAcroRect.Top = CArcoPoint.Y
+        CAcroRect.Left = 0
+        CAcroRect.Right = CArcoPoint.X
+        CAcroRect.bottom = 0
+        
+        Set PDTxtSelect = PDDoc.CreateTextSelect(strPageNum, CAcroRect)
+
+        iNumWords = PDTxtSelect.GetNumText
+        y = PDTxtSelect.getpage
+	  '  j = PDTxtSelect.gettext
+		
+        ' Extract the text as String
+        ' see more notes below
+        For i = 0 To iNumWords - 1
+            sPgTxt = sPgTxt + PDTxtSelect.GetText(i)
+        Next
+        
+        ' split the string on newlines,
+        ' put each line in array element
+        arPdfLines = Split(sPgTxt, vbCrLf)
+       ' lineNo = UBound(arPdfLines)
+		'msgbox lineNo
+        For i = 0 To UBound(arPdfLines)
+			If instr(1, arPdfLines(i),strSearchText,1)<>0 Then
+						fg_GetStringPDF = TRIM(arPdfLines(i))
+		Exit For
+			End If
+        Next 
+    End If
+    
+    Set PDDoc = Nothing
+    Set PDPage = Nothing
+    Set PDTxtSelect = Nothing
+    Set CAcroRect = Nothing
+    Set CArcoPoint = Nothing
+End Function
+
+
+
+
+
+
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - Used to verify if specified string of text appears in the specified page(Match Case/Match Whole Word)
+'strPDFPath - Path of PDF  file,intPageNumber- Page Number in which Text is expected in strText- Text to be searched for (eg'Policy Number is xxx xxx  xx xx ')
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Function fg_VerifyTextINPDFPage(strPDFPath,strText,intPageNumber)
+Dim AcroApp, AcroAVDoc
+Dim gPDFPath, bReset, nCount
+Set AcroApp = CreateObject( "AcroExch.App" )
+' ** show Acrobat
+'AcroApp.Show()
+' ** Set AVDoc object
+Set AcroAVDoc = CreateObject( "AcroExch.AVDoc" )
+' ** open the PDF
+If AcroAVDoc.Open( strPDFPath, "" ) Then
+	AcroApp.hide()
+	Set acroPDDoc = AcroAVDoc.GetPDDoc()
+	Set AcroAvPageView = AcroAVDoc.GetAVPageView()
+bReset = True ' : nCount = 0
+Do While AcroAVDoc.FindText( strText, True, True, bReset )
+bReset = False ' : nCount = nCount + 1
+strTotalPageNum = acroPDDoc.GetNumPages()
+strCurrentPageNum = AcroAvPageView.GetPageNum()
+strCurrentPageNum = strCurrentPageNum + 1
+If  strCurrentPageNum = intPageNumber  Then
+  fg_VerifyTextINPDFPage = "PASS"
+  Exit Do
+End If
+If  strCurrentPageNum = strTotalPageNum  Then
+	Exit Do
+	End If
+'Wait(5)
+Loop
+End If
+If bReset Then
+     fg_VerifyTextINPDFPage = "FAIL"
+End If
+AcroApp.CloseAllDocs()
+AcroApp.Exit()
+Set AcroApp = Nothing
+Set AcroAVDoc = Nothing
+Set acroPDDoc = Nothing
+Set AcroAvPageView = Nothing
+
+End Function
+
+
+
+
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - Used to get a string of text from specified page in PDF,the string is returned  relative 
+'                     to searched string , this function returns between 2 words, does not return full line
+'strPath - Path of PDF  file,strPageNumber- Page Number in which Text is expected in strStart - Starting Text (From where string needs to be cut)
+'strEnd - Ending Text (Till where string needs to be cut)
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Function fg_GetTextPDF(strPath,strPageNumber,strStart,strEnd)
+
+Dim pdDoc, jso
+Dim path, word, result
+Dim i,j, foundErr
+path = strPath
+foundErr = False
+Set AcroApp = CreateObject( "AcroExch.App" )
+Set pdDoc = CreateObject( "AcroExch.PDDoc" )
+If pdDoc.Open( path ) Then
+	AcroApp.hide
+Set jso = pdDoc.GetJSObject
+If Not jso Is Nothing Then
+count = jso.getPageNumWords( strPageNumber )
+For i = 0 To count - 1
+word = jso.getPageNthWord( strPageNumber, i, False )
+'Print "1st Word='" & word & "'"
+Flag = False
+If strComp(TRIM(word),strStart,1)=0 Then
+		             J = i+1
+			   For  J = i+1 To count-1
+word = jso.getPageNthWord( strPageNumber, J, False )
+ 		   
+					 If strComp(TRIM(word),strEnd,1)=0 Then 
+						 Exit For
+						 Flag = True
+					End If 
+					wordf = wordf&word
+					
+			   Next   	 
+	   End If
+if Flag Then
+	Exit For
+End If
+Next
+fg_GetTextPDF = TRIM(wordf)
+Set jso = Nothing
+pdDoc.Close
+End If
+Else
+Print "Failed to open " & path
+End If
+Set pdDoc = Nothing
+End Function
+
+
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - Used to get a string of text from specified page in PDF,the string is returned  relative 
+'                     to searched string , ie if we are searching for stirnfg 'Policy Holder',function returns 
+'                     complete text in  Nth line from line which has 'Policy  Holder 'in it (First Occurance)
+'strPath - Path of PDF  file,strPageNumber- Page Number in which Text is expected in strSearchText- Text to be searched for (eg'Policy Number')
+'strLineToRetrieve - Line number after searched text from which text is to be retrieved.
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Function fg_GetStringNLinesPDF(strPath,strPageNumber,strSearchText,strLineToRetrieve)
+    strPageNum = strPageNumber - 1
+    Dim PDDoc 
+    Dim CAcroRect 
+    Dim PDPage 
+    Dim PDTxtSelect
+    Dim CArcoPoint
+    
+    Dim sPgTxt 
+    Dim iNumWords 
+    
+    Dim arPdfLines
+    
+    Dim i
+    
+	
+    'Load the PDF File
+    Set PDDoc = CreateObject( "AcroExch.PDDoc" )
+    If PDDoc.Open(strPath) Then
+       ' Zero = the 1st page
+        Set PDPage = PDDoc.AcquirePage(strPageNum)   
+        Set CArcoPoint = PDPage.GetSize()                               
+		Set CAcroRect = CreateObject("AcroExch.Rect")
+
+        
+        ' set the selected text area to the size of the page
+        CAcroRect.Top = CArcoPoint.Y
+        CAcroRect.Left = 0
+        CAcroRect.Right = CArcoPoint.X
+        CAcroRect.bottom = 0
+        
+        Set PDTxtSelect = PDDoc.CreateTextSelect(strPageNum, CAcroRect)
+
+        iNumWords = PDTxtSelect.GetNumText
+        y = PDTxtSelect.getpage
+	  '  j = PDTxtSelect.gettext
+		
+        ' Extract the text as String
+        ' see more notes below
+        For i = 0 To iNumWords - 1
+            sPgTxt = sPgTxt + PDTxtSelect.GetText(i)
+        Next
+        
+        ' split the string on newlines,
+        ' put each line in array element
+        arPdfLines = Split(sPgTxt, vbCrLf)
+       ' lineNo = UBound(arPdfLines)
+		'msgbox lineNo
+        For i = 0 To UBound(arPdfLines)
+			If instr(1, arPdfLines(i),strSearchText,1)<>0 Then
+                 i = i + strLineToRetrieve
+                fg_GetStringNLinesPDF = TRIM(arPdfLines(i))
+		Exit For
+			End If
+        Next 
+    End If
+    
+    Set PDDoc = Nothing
+    Set PDPage = Nothing
+    Set PDTxtSelect = Nothing
+    Set CAcroRect = Nothing
+    Set CArcoPoint = Nothing
+End Function
+
+
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'Purpose - To Compare the two PDF files whether they have the same contents or not.
+'PDF1 - Path of the PDF  file 1
+'PDF2 - Path of the PDF  file 2
+'-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+PDF1="C:\Documents and Settings\A7U08\Desktop\Test.pdf"
+PDF2="C:\Documents and Settings\A7U08\Desktop\Enrollment.pdf"
+Dim Obj
+Set Obj = CreateObject("Mercury.FileCompare")
+If Obj.IsEqualBin(PDF1,PDF2,0,1) Then
+	Msgbox "File Matches"
+Reporter.ReportEvent micPass, "PDF File Comparison","File Matches"
+Else
+	Msgbox "File Doesn't Matches"
+Reporter.ReportEvent micFail, "PDF File Comparison","File Doesn't Matches"
+End if 

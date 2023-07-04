@@ -1,0 +1,169 @@
+	FileName = "CL-02"
+	ResultsPath="C:\QTPScripts\QCScripts\Benefit Handling Automation\Navilink\Results\11252009\TC_02\TC_02_"
+	Call F_Table_header(FileName)
+	Call F_Add_Results("CL-02","Validate the Output Results","Validated Success","Validated as expected","PASS")
+	Call F_Add_Results("CL-02","Validate the Output Results","Validated Success","Validated as expected","PASS")
+   
+	
+
+'######################################################################################################################################
+'Function Name : F_Table_header()
+'Function Description:  Function to write the Header and Designing of the HTML file
+'Function Parameters:	FileName
+'Return Value: 	None
+'Date: 18th Dec 2009
+'#######################################################################################################################################
+ Function F_Table_header(FileName)
+			  Dim fso, MyFile
+			  strFilename = FileName
+			  Set fso = CreateObject("Scripting.FileSystemObject")
+			  Set MyFile = fso.CreateTextFile(ResultsPath& Month(Now) & Day(Now) & Year(Now) &".html", True)
+			  MyFile.Close
+			  strFilename = FileName
+			  intIterVal = "Test Case Description"
+			  Set fso = CreateObject("Scripting.FileSystemObject")
+					   
+			  Set MyFile = fso.OpenTextFile(ResultsPath& Month(Now) & Day(Now) & Year(Now) &".html",8)
+			  Myfile.Writeline("<html>")
+			  Myfile.Writeline("<head>")
+			  Myfile.Writeline("<meta http-equiv=" & "Content-Language" & "content=" & "en-us>")
+			  Myfile.Writeline("<meta http-equiv="& "Content-Type" & "content=" & "text/html; charset=windows-1252" & ">")
+			  Myfile.Writeline("<title>"&strFilename&"_NAVILINK REGRESSION CASES</title>")
+			  Myfile.Writeline("</head>")
+			  Myfile.Writeline("<body>")
+			  Myfile.Writeline("<blockquote>")
+			  Myfile.Writeline("<table border=2 bordercolor=" & "#000000 id=table1 width=1000 height=31 bordercolorlight=" & "#000000>")
+			  Myfile.Writeline("<tr>")
+			  Myfile.Writeline("<td COLSPAN = 7 bgcolor = #FFF8C6>")
+			  Myfile.Writeline("<p align=center><font color=#000080 size=4 face= "& chr(34)&"Copperplate Gothic Bold"&chr(34) & ">&nbsp;NAVILINK REGRESSION CASES - Automation Scripts Results "&"</font><font face= " & chr(34)&"Copperplate Gothic Bold"&chr(34) & "></font> </p>")
+			  Myfile.Writeline("</td>")
+			  Myfile.Writeline("</tr>")
+			  Myfile.Writeline("<tr>")
+			  Myfile.Writeline("<td COLSPAN = 7 bgcolor = #FFF8C6>")
+			  Myfile.Writeline("<p align=justify><b><font color=#000060 size=2 face= Verdana>"& "&nbsp;"& "DATE :&nbsp;&nbsp;" &  now  & "                                    | Tester Name:  DIL08                                     | Machine IP : 10.8.95.160 &nbsp")
+			  Myfile.Writeline("</td>")
+			  Myfile.Writeline("</tr>")
+			  Myfile.Writeline("<tr bgcolor=#8A4117>")
+			  Myfile.Writeline("<td width=" & "600")
+			  Myfile.Writeline("<p align=" & "center><b><font color = white face=" & "Arial Narrow " & "size=" & "2" & ">" & "Test Case # </b></td>")
+			  Myfile.Writeline("<td width=" & "1800")
+			  Myfile.Writeline("<p align=" & "center><b><font color = white face=" & "Arial Narrow " & "size=" & "2" & ">" & "Test Case Description </b></td>")
+			  Myfile.Writeline("<td width=" & "2000")
+			  Myfile.Writeline("<p align=" & "center><b><font color = white face=" & "Arial Narrow " & "size=" & "2" & ">" & "Expected Result</b></td>")
+			  Myfile.Writeline("<td width=" & "2000>")
+			  Myfile.Writeline("<p align=" & "center" & ">" & "<b><font color = white face=" & "Arial Narrow " & "size=" & "2" & ">" & "Actual Results</b></td>")
+			  Myfile.Writeline("<td width=" & "500>")
+			  Myfile.Writeline("<p align=" & "center" & ">" & "<b><font color = white face=" & "Arial Narrow " & "size=" & "2" & ">" & "Status</b></td>")
+			  Myfile.Writeline("<td width=" & "500>")
+			  Myfile.Writeline("<p align=" & "center" & ">" & "<b><font color = white face=" & "Arial Narrow " & "size=" & "2" & ">" & "Comments</b></td>")
+			  Myfile.Writeline("</tr>")
+			  Myfile.Writeline("</blockquote>")
+			  Myfile.Writeline("</body>")
+			  Myfile.Writeline("</html>")
+			  MyFile.Close
+	End Function
+	
+
+'######################################################################################################################################
+'Function Name : F_Add_Results()
+'Function Description:  Function to write the Results and Description in HTML File
+'Function Parameters:	TestCaseID,TestDescription,ExpectedResults,ActualResults,Status
+'Return Value: 	None
+'Date: 18th Dec 2009
+'#######################################################################################################################################
+ Function F_Add_Results(TestCaseID,TestDescription,ExpectedResults,ActualResults,Status)
+	Dim vPassCtr, vFailCtr, vNRCtr
+			  vPassCtr = 0
+			  vFailCtr = 0
+			  vNRCtr = 0
+			  StrRwCunt =0
+			  
+				strFilename = FileName
+				Set fso = CreateObject("Scripting.FileSystemObject")
+				Set Myfile = fso.OpenTextFile(ResultsPath& Month(Now) & Day(Now) & Year(Now) &".html",8)
+				HTML_TestCaseID = TestCaseID
+				HTML_TestDescription = TestDescription
+				HTML_ExpectedResults = ExpectedResults
+				HTML_ActualResults = ActualResults
+				HTML_TestStatus = UCASE(Status)
+			   If HTML_TestStatus = "PASS" or HTML_TestStatus = "FAIL" or HTML_TestStatus = "NOT RUN"  Then
+					Myfile.Writeline("<tr bgcolor = #FDEEF4 >")
+				    Myfile.Writeline("<td width=" & "400>")
+					Myfile.Writeline("<p align=" & "Center><font face=" & "Verdana " & "size=" & "2" & ">"  &  HTML_TestCaseID & "</td>")
+					Myfile.Writeline("<td width=" & "400>")
+					Myfile.Writeline("<p align=" & "Left><font face=" & "Verdana " & "size=" & "2" & ">"  &  HTML_TestDescription & "</td>")
+					Myfile.Writeline("<td width=" & "400>")                
+						If HTML_ExpectedResults <> "" Then
+						   Myfile.Writeline("<p align=" & "Left><font face=" & "Verdana " & "size=" & "2" & ">"  &  HTML_ExpectedResults & "</td>")
+						Else
+						   Myfile.Writeline("<p align=" & "center><font face=" & "Verdana " & "size=" & "2" & "> &nbsp;</td>")
+						End If
+					 Myfile.Writeline("<td width=" & "400>")                
+						  If HTML_ActualResults <> "" Then
+						   Myfile.Writeline("<p align=" & "Left><font face=" & "Verdana " & "size=" & "2" & ">"  &  HTML_ActualResults & "</td>")
+						Else
+						   Myfile.Writeline("<p align=" & "center><font face=" & "Verdana " & "size=" & "2" & "> &nbsp;</td>")
+						End If
+					Myfile.Writeline("<td height=" &  "23" & "width=400" & ">")                             
+					   If HTML_TestStatus = "PASS" then
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#008000" & ">" & HTML_TestStatus & "</font></b>" & "</td>")
+					   Elseif HTML_TestStatus = "FAIL" then
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#FF0000" & ">" & HTML_TestStatus & "</font></b>" & "</td>")
+					   Elseif HTML_TestStatus = "NOT RUN" then
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#FF0000" & ">" & HTML_TestStatus & "</font></b>" & "</td>")
+					   else
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#FF0000" & ">" & HTML_TestStatus & "</font></b>" & "</td>")
+					   End If
+					 Myfile.Writeline("<td width=" & "400" & "nowrap>")  
+			   
+					  If HTML_TestStatus = "PASS" then
+						vPassCtr = vPassCtr + 1
+						Myfile.Writeline("<p align=" & "center" & "><font color=#000080 face=" & "Verdana " & "size=" & "2" & "> As Expected </td>")
+					Elseif HTML_TestStatus = "FAIL" then
+						vFailCtr = vFailCtr + 1
+						Myfile.Writeline("<p align=" & "center" & "><font color=#000080 face=" & "Verdana " & "size=" & "2" & ">Not As Expected </td>")
+					Elseif HTML_TestStatus = "NOT RUN" then
+						 vNRCtr = vNRCtr + 1
+						Myfile.Writeline("<p align=" & "center" & "><font color=#000080 face=" & "Verdana " & "size=" & "2" & "> Not Executed </td>")
+					End If
+			   
+			 ElseIf  HTML_TestStatus = "" Then
+				Myfile.Writeline("<tr bgcolor = #FDEEF4 >")
+				Myfile.Writeline("<td width=" & "400>")
+				Myfile.Writeline("<p align=" & "Left><b><font color=#000080 size=2 face=" & "Verdana " & "size=" & "2" & ">"  &  TestCaseID & "</td>")    
+				Myfile.Writeline("<td width=" & "400>")
+				Myfile.Writeline("<p align=" & "Left><b><font color=#000080 size=2 face=" & "Verdana " & "size=" & "2" & ">"  &  TestDescription & "</td>")
+				Myfile.Writeline("<td width=" & "400>")
+					If ExpectedResults <> "" Then
+					 Myfile.Writeline("<p align=" & "Left><b><font color=#000080 face=" & "Verdana " & "size=" & "2" & ">"  &  ExpectedResults & "</td>")
+					 Else
+					Myfile.Writeline("<p align=" & "Left><b><font color=#000080 face=" & "Verdana " & "size=" & "2" & "> &nbsp;</td>")
+					End If
+			   Myfile.Writeline("<td height=" &  "23" & "width=400" & ">")                             
+				   If Status = "PASS" then
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#008000" & ">" & Status & "</font></b>" & "</td>")
+				   Elseif Status = "FAIL" then
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#FF0000" & ">" & Status & "</font></b>" & "</td>")
+				   Elseif Status = "NOT RUN" then
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#FF0000" & ">" & Status & "</font></b>" & "</td>")
+				   Else
+						Myfile.Writeline("<p align=" & "center" & ">" & "<b><font face=" & "Verdana " & "size=" & "2" & " color=" & "#FF0000" & ">" & Status & "</font></b>" & "</td>")
+				   End If
+				 Myfile.Writeline("<td width=" & "400" & "nowrap>")                       
+			   If Status = "PASS" then
+				   vPassCtr = vPassCtr + 1
+				  Myfile.Writeline("<p align=" & "center" & "><font color=#000080 face=" & "Verdana " & "size=" & "2" & ">As Expected </td>")
+			   Elseif res = "FAIL" then
+					vFailCtr = vFailCtr + 1
+					Myfile.Writeline("<p align=" & "center" & "><font color=#000080 face=" & "Verdana " & "size=" & "2" & ">Not As Expected </td>")
+			   Elseif res = "NOT RUN" then
+					vNRCtr = vNRCtr + 1
+					Myfile.Writeline("<p align=" & "center" & "><font color=#000080 face=" & "Verdana " & "size=" & "2" & "> Not Executed </td>")
+			   End If
+			   StrRwCunt = StrRwCunt +1
+			  End If                
+					 
+		 Myfile.Writeline("</tr>")
+		Myfile.Close
+		
+End Function

@@ -1,0 +1,194 @@
+g_StartTime = Time
+g_ActionName = Environment("ActionName")
+g_HandleError = Environment("UDV_ERROR_HANDLE")
+If  UCase(g_HandleError) = "YES" Then
+	On Error resume next 
+End If 
+'========================================================================================================================================================
+g_strMainPath = Environment("UDV_SU_SUTE_PATH")
+g_strInputPath = Environment("UDV_SU_INPUT_PATH")
+g_strOutputPath = Environment("UDV_SU_OUTPUT_PATH")
+g_strIEPath = Environment("UDV_SU_IE_PATH")
+g_strEnvironment = Environment("UDV_UATENVIRONMENT")
+g_strIservicesITEST1Path = Environment("UDV_NAVILINK_ITEST1_PATH")
+g_strIservicesUAPath = Environment("UDV_NAVILINK_UA_PATH")
+g_ActionName = Environment("ActionName")
+
+sv_SharePathLength=Len(g_strOutputPath)
+sv_TempLength=sv_SharePathLength-7
+sv_SharePath=Left(g_strOutputPath,sv_TempLength)
+g_ErrorSheetPathVal =sv_SharePath&"\ErrorLog"
+
+'Environment.Value("pramErrorSheetPath") = pramErrorSheetPathVal 
+g_Date_Time = MonthName(Month(now),True) & "_" & Day(Now) & "_" & Year(Now) & "(" & Hour(Now) & "." & Minute(Now) & "." & Second(Now) & ")"
+'Error Updation on the Configuration File
+fn_UpdateErrorDetails "N/A","Error In Configuration File",Err.description,g_ActionName,"","Y",Err.Number,""
+'========================================================================================================================================================
+' Checking the values of the Environment Variables are not NULL
+If g_strMainPath = "" OR g_strInputPath = "" OR g_strOutputPath = "" OR g_strIEPath = "" OR g_strEnvironment = "" OR g_strIservicesITEST1Path = "" OR g_HandleError = "" Then
+	fn_UpdateErrorDetails "N/A","Some value in the Configuration File is NULL","",g_ActionName,"","Y",Err.Number,""
+End If
+'========================================================================================================================================================
+'Call the Sync Functon
+Systemutil.Run g_strMainPath & "\Library\Sync.vbs"
+'========================================================================================================================================================
+ 'Call the close application
+SystemUtil.CloseProcessByName("Unum.Benefits.NavilinkUI.exe")
+SystemUtil.CloseProcessByName("Unum.Enterprise.ImageServices.OnScreenLoader.exe")
+wait(15)
+If UCASE(g_strEnvironment) = "ITEST1"  Then
+	Systemutil.Run g_strIservicesITEST1Path
+Elseif UCASE(g_strEnvironment) = "UA"  Then
+	Systemutil.Run g_strIservicesUAPath
+Else
+'Error Updation no Environment variable is set
+	fn_UpdateErrorDetails "N/A","Invalid Environment Option Entered In Configuration File (Valid Options - iTest1)","",g_ActionName,"","Y","0","Y"	
+End If
+wait(10)
+Call SyncWind()
+If Browser("Brw_NavilinkLoad").Dialog("DLog_NavilinkLoad").WinButton("WBtn_Yes").Exist(10) Then
+	Browser("Brw_NavilinkLoad").Dialog("DLog_NavilinkLoad").WinButton("WBtn_Yes").Click
+End If
+wait(10)
+'========================================================================================================================================================
+'Check Whether the Application has Loadedup
+Set obj = fn_Object("SwfWindow","NavLnkUnavail")
+Set NaviLinkUnAvail= SwfWindow(obj)
+If NaviLinkUnAvail.Exist(10) Then
+ fn_UpdateErrorDetails "N/A","Navilink is Unavailble","",g_ActionName,"","Y","0","Y"
+End If
+'========================================================================================================================================================
+'Check for Input and Data Sheet
+sv_strDataFile =  g_strInputPath & "\INPUT.xls"
+sv_strDataFile2 =  g_strInputPath & "\Data_Sheet.xls"
+sv_strDataFile_check = fn_CheckFileExist(sv_strDataFile)
+sv_strDataFile2_check = fn_CheckFileExist(sv_strDataFile2)
+If sv_strDataFile_check = "Fail" or sv_strDataFile2_check = "Fail" Then
+	fn_UpdateErrorDetails "N/A","Please check for missing files.Either the Input sheet or Data sheet(in Configuration Folder) is missing.","",g_ActionName,"","Y","0","Y"
+End If
+'========================================================================================================================================================
+'Check for Object Repositiry
+sv_strObjRepPath =  g_strInputPath & "\INPUT.xls"
+sv_strObjRepPath_check = fn_CheckFileExist(sv_strObjRepPath)
+If sv_strObjRepPath_check = "Fail" Then
+	fn_UpdateErrorDetails "N/A","Please check for missing files.Either the Input sheet or Data sheet(in Configuration Folder) is missing.","",g_ActionName,"","Y","0","Y"
+End If
+'========================================================================================================================================================
+Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+sv_objConnAdCn.Open sv_strConnection
+sv_strSQL= "Select * from [USERINPUT$] where UCASE(TO_BE_EXECUTED) = 'YES'" 
+Set sv_objRecAdRs = CreateObject("ADODB.Recordset")
+sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+sv_EOFFlag = 0
+'If the configuration file record set is empty the exit run
+'============================================
+If sv_objRecAdRs.EOF Then
+	sv_EOFFlag = 1
+	fn_UpdateErrorDetails "Input Error","Please check on the To Be Executed sheet has any value is marked asYES.","",g_ActionName,"","N","0","Y"
+	On error goto 0 	
+End If
+
+If sv_EOFFlag = 0 Then
+	' Moving to the First RecordSet
+	sv_objRecAdRs.MoveFirst
+'===============================================================================
+	Do While not  sv_objRecAdRs.EOF
+		g_Scenario = sv_objRecAdRs("SCENARIO")	
+		g_SSN = sv_objRecAdRs("SSN")
+		g_POLICY = sv_objRecAdRs("POLICY")	
+		g_ASOFDATE = sv_objRecAdRs("ASOFDATE")
+		g_CLAIMNO = sv_objRecAdRs("CLAIMNO")	
+		Call OpenReport(g_Scenario)
+        'call the navilink application
+''========================================================================================================================================================
+		sv_strSQL1= "Select * from [GLOBALSHEET$] where UCASE(SCENARIO) = '" & g_Scenario & "'" 
+		Set sv_objRecAdRs1 = CreateObject("ADODB.Recordset")
+		sv_objRecAdRs1.Open sv_strSQL1,sv_objConnAdCn
+		sv_EOFFlag1 = 0
+		'If the configuration file record set is empty the exit run
+		'============================================
+		If sv_objRecAdRs1.EOF Then
+			sv_EOFFlag1 = 1
+			fn_UpdateErrorDetails "Input Error","There is no corresponding value markes as YES for the following Secnario - " & g_Scenario & " in the GlobalSheet.","",g_ActionName,"","N","0","Y"
+		    On error goto 0 
+		End If
+		
+		If sv_EOFFlag1 = 0 Then
+			' Moving to the First RecordSet
+			sv_objRecAdRs1.MoveFirst
+		'===============================================================================
+			Do While not  sv_objRecAdRs1.EOF
+                For Each sv_GLOBALSHEET in sv_objRecAdRs1.Fields
+					If UCASE(sv_objRecAdRs1(sv_GLOBALSHEET.Name)) = "YES" Then
+''========================================================================================================================================================
+							Set sv_objConnAdCn2 = CreateObject("ADODB.Connection")
+							sv_strConnection2="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile2 & ";ReadOnly=True;"
+							sv_objConnAdCn2.Open sv_strConnection2
+							sv_strSQL2= "Select * from ["& sv_GLOBALSHEET.Name &"$] where UCASE(SCENARIO) = '" & g_Scenario & "'" 
+							Set sv_objRecAdRs2 = CreateObject("ADODB.Recordset")
+							sv_objRecAdRs2.Open sv_strSQL2,sv_objConnAdCn2
+							sv_EOFFlag2 = 0
+							'If the configuration file record set is empty the exit run
+							'============================================
+							If sv_objRecAdRs2.EOF Then
+								sv_EOFFlag2 = 1
+								fn_UpdateErrorDetails "Input Error","There is no corresponding value markes as YES for the following Function - " & sv_GLOBALSHEET.Name & " in the DataSheet.","",g_ActionName,"","N","0","Y"
+                                On error goto 0 
+							End If
+							
+							If sv_EOFFlag2 = 0 Then
+								' Moving to the First RecordSet
+								sv_objRecAdRs2.MoveFirst
+							'===============================================================================
+								Do While not  sv_objRecAdRs2.EOF
+                                    For Each sv_DataSheet in sv_objRecAdRs2.Fields
+										If UCASE(sv_objRecAdRs2(sv_DataSheet.Name)) = "YES" Then
+											g_fnName = sv_DataSheet.Name
+                                            g_ErrorFlag = TRUE
+											RunAction "ASF", oneIteration
+										End If
+									Next
+									sv_objRecAdRs2.MoveNext
+								Loop
+							End If
+''========================================================================================================================================================		
+					End If
+				Next
+                sv_objRecAdRs1.MoveNext
+			Loop
+		 End If
+'========================================================================================================================================================
+		Call CloseReport()
+		Call fn_UpdateStatus()
+		sv_objRecAdRs.MoveNext
+	Loop
+End If	
+'========================================================================================================================================================
+' Call the close application
+wait(5)
+SystemUtil.CloseProcessByName("Unum.Benefits.NavilinkUI.exe")
+SystemUtil.CloseProcessByName("Unum.Enterprise.ImageServices.OnScreenLoader.exe")
+'========================================================================================================================================================
+'DB Update
+g_EndTime = Time
+
+sv_strDataFile = g_strInputPath & "\Input.xls"
+Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+sv_strConnection="Driver={Microsoft Excel Driver (*.xls)};DBQ=" & sv_strDataFile & ";ReadOnly=True;"
+sv_objConnAdCn.Open sv_strConnection
+sv_strSQL= "Select Count(*) AS sv_Status FROM [USERINPUT$] where UCASE(STATUS) = 'COMPLETED'"
+sv_strSQL1= "Select Count(*) AS sv_Count from [USERINPUT$] where UCASE(TO_BE_EXECUTED) = 'YES'" 
+Set sv_objRecAdRs = CreateObject("ADODB.Recordset")
+sv_objRecAdRs.Open sv_strSQL,sv_objConnAdCn
+g_ExecCount = sv_objRecAdRs("sv_Status")
+Set sv_objRecAdRs1 = CreateObject("ADODB.Recordset")
+sv_objRecAdRs1.Open sv_strSQL1,sv_objConnAdCn
+g_TotalCount = sv_objRecAdRs1("sv_Count")
+
+ScriptName = "Navilink UI"
+g_Desc = "Total Scenario executed - " & g_ExecCount
+ScriptID = 4
+Call DetailsUpdate(ScriptID,ScriptName,g_StartTime,g_EndTime,g_Desc)
+'Call fn_SendMail()
+'========================================================================================================================================================

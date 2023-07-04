@@ -1,0 +1,217 @@
+Public Function Fn_Eligibility_Class()
+
+	sv_Temp_rc = DataTable.GetSheet("Temp_Sheet").GetRowCount
+	DataTable.AddSheet ("Eligibility_Class")
+	DataTable.AddSheet("Eligibility_Class1")
+	Datatable.GetSheet("Eligibility_Class").AddParameter "EMPCLASS",""
+	Datatable.GetSheet("Eligibility_Class").AddParameter "Eligibility_Desc",""
+
+		DataTable.ExportSheet g_strMainPath &"\Results\" & g_EBCN & ".xls","Temp_Sheet"
+		Const xlAscending = 1
+        Const xlYes = 1
+        Set objExcel = CreateObject("Excel.Application")
+		objExcel.Visible = False
+		Set objWorkbook = objExcel.Workbooks.Open (g_strMainPath &"\Results\" & g_EBCN & ".xls")
+		Set objWorksheet = objWorkbook.Worksheets("Temp_Sheet")
+		
+		Set objRange = objWorksheet.UsedRange
+		Set objRange2 = objExcel.Range("J1")
+		objRange.Sort objRange2, xlAscending, , , , , , xlYes
+		
+		totalrows =sv_Temp_rc + 1
+        
+		For Row = totalrows To 2 Step -1
+				If objExcel.cells(Row,10).value=objExcel.cells(Row-1,10).value Then
+                        set objRange1 = objExcel.Cells(Row,10).EntireRow
+						 objRange1.Delete
+				End If
+		Next 
+		objExcel.DisplayAlerts = False 
+		objExcel.Save
+		objExcel.Quit
+		Wait(5)
+		DataTable.ImportSheet g_strMainPath & "\Results\" & g_EBCN & ".xls","Temp_Sheet","Eligibility_Class1"
+
+		myfilepath = g_strMainPath & "\Results\" & g_EBCN & ".xls"
+		Set objFSO = CreateObject("Scripting.FileSystemObject")
+		Set Deletion = objFSO.GetFile (myfilepath)
+		Deletion.delete
+
+		sv_ERC = DataTable.GetSheet("Eligibility_Class1").GetRowCount
+'		sv_ERC1 = DataTable.GetSheet("Eligibility_Class").GetRowCount
+		For sv_ERCi = 1 to sv_ERC
+			DataTable.GetSheet("Eligibility_Class1").SetCurrentRow(sv_ERCi)
+			sv_EClass = DataTable.Value("EMPCLASS","Eligibility_Class1")
+			If sv_EClass <> ""  Then
+					sv_ERC1 = sv_ERC1 + 1
+					DataTable.GetSheet("Eligibility_Class").SetCurrentRow(sv_ERC1)
+					DataTable.Value("EMPCLASS","Eligibility_Class") = sv_EClass
+			End If
+		Next
+DataTable.DeleteSheet "Eligibility_Class1"
+sv_Temprc = DataTable.GetSheet("Eligibility_Class").GetRowCount
+
+'For sv_i =1 to sv_Temprc
+
+sv_Flag = 0
+RBCN = g_RBCN
+'DataTable.GetSheet("Eligibility_Class").SetCurrentRow(sv_i)
+'g_Class_Code = DataTable.Value("EMPCLASS","Eligibility_Class")
+
+Dim xmlDOC 
+Dim bOK 
+Dim HTTP 
+Set HTTP = CreateObject("MSXML2.XMLHTTP") 
+Set xmlDOC =CreateObject("MSXML.DOMDocument") 
+
+sv_mainBeginBody = "<soap:Envelope xmlns:soap= 'http://schemas.xmlsoap.org/soap/envelope/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema'><soap:Body>" 
+sv_teamp_code1 = "<GetCustomerAgreementByGroupRateIdentifierRequest xmlns='http://UnumProvident.com/Agreements/Contracts/v1'>" 
+sv_teamp_code2 = sv_teamp_code1 & "<Key><GroupRateIdentifier>"&RBCN&"</GroupRateIdentifier>" 
+sv_teamp_code3 = sv_teamp_code2 & "<IncludeAllInforceProductIndicator>Yes</IncludeAllInforceProductIndicator></Key></GetCustomerAgreementByGroupRateIdentifierRequest>" 
+sv_mainendBody = "</soap:Body></soap:Envelope>" 
+' 
+sv_CompleteXML = sv_mainBeginBody & sv_teamp_code3 & sv_mainendBody 
+' 
+xmlDOC.loadXML sv_CompleteXML 
+xmlDOC.Async=False 
+sv_Operation=GetCustomerAgreementByGroupRateIdentifier 
+
+If  g_str_Environment ="EIMS" or g_str_Environment ="eims"  Then 
+                HTTP.Open "POST","http://prod.unum.agreements/v01/CustomerAgreement.asmx?WSDL",sv_Operation 
+                HTTP.Send(xmlDoc) 
+                sv_Responce_Object = xmlDOC.load(HTTP.responseXML) 
+ElseIf g_str_Environment ="QIMS" or g_str_Environment ="qims" Then 
+                HTTP.Open "POST","http://acpt.unum.agreements/v01/CustomerAgreement.asmx?WSDL",sv_Operation 
+                HTTP.Send(xmlDoc) 
+                sv_Responce_Object = xmlDOC.load(HTTP.responseXML) 
+ElseIf g_str_Environment = "IMS2" or g_str_Environment ="ims2" Then 
+                HTTP.Open "POST","http://prod.unum.agreements/v01/CustomerAgreement.asmx?WSDL",sv_Operation 
+                HTTP.Send(xmlDoc) 
+                sv_Responce_Object = xmlDOC.load(HTTP.responseXML) 
+End If 
+
+If Not sv_Responce_Object then 
+Else 
+ Set objFs = CreateObject("Scripting.FileSystemObject") 
+        strFileName = g_strMainPath &"\Results\Script_Response\" 
+        
+        If Not objFs.FolderExists(strFileName) Then 
+                                        objFs.CreateFolder(strFileName) 
+		Else 
+													
+		End If 
+        
+ Set objFSO = CreateObject("Scripting.FileSystemObject") 
+ sv_File_Name = RBCN&"_"&MonthName(Month(now),True) & "_" & Day(Now) & "_" & Year(Now) & "(" & Hour(Now) & "." & Minute(Now) & "." & Second(Now) & ")" 
+' 
+ Set objFile = objFSO.CreateTextFile (g_strMainPath &"\Results\Script_Response\Script_Response_"&sv_File_Name&".xml", ForWriting) 
+ objFile.Write HTTP.ResponseText 
+ objFile.Close 
+' 
+For sv_i =1 to sv_Temprc
+DataTable.GetSheet("Eligibility_Class").SetCurrentRow(sv_i)
+g_Class_Code = DataTable.Value("EMPCLASS","Eligibility_Class")
+
+Set Tag_Products = xmlDoc.documentElement.getElementsByTagName("CustomerAgreementClass") 
+' 
+	For Each Temp_Product in Tag_Products 
+        Set Tag_Product = Temp_Product.childNodes 
+                For Each Temp_ProductProvisions in Tag_Product 
+						If Temp_ProductProvisions.nodename = "EligibilityClassCode" Then
+										If  Temp_ProductProvisions.Text = g_Class_Code Then
+													sv_Flag = 1
+													Exit For
+										Else
+											Exit For
+										End If
+						End If
+				Next
+		If sv_Flag = 1Then
+				sv_Flag = 0
+				 For Each Temp_ProductProvisions in Tag_Product 
+							If Temp_ProductProvisions.nodename = "EligibilityDescription" Then
+								Set Tag_Code_Product = Temp_ProductProvisions.childNodes
+										For Each Temp_Code_Product in Tag_Code_Product
+													If Temp_Code_Product.nodename = "CodeValue" Then
+																Set Tag_Code_Description = Temp_Code_Product.childNodes
+																		For Each Temp_Code_Description in Tag_Code_Description
+																						If Temp_Code_Description.nodename = "CodeDescriptionText" Then
+                                                                                                    If Temp_Code_Description.Text <> "Other" Then
+																													g_Code_Description = Temp_Code_Description.Text
+																									Else
+																													For Each Temp_ProductProvisions1 in Tag_Product 
+																																		If Temp_ProductProvisions1.nodename = "AdditionalEligibilityDescriptionText" Then	
+																																									g_Code_Description = Temp_ProductProvisions1.Text
+																																		End If
+																													Next
+																									End If
+																						End If
+																		Next
+													End If
+										Next
+							End If
+					Next
+			End If
+		Next		
+	'End If
+	DataTable.Value("Eligibility_Desc","Eligibility_Class")  = g_Code_Description
+Next
+End If
+
+sv_TRC = DataTable.GetSheet("Temp_Sheet").GetRowCount
+sc_ERC = DataTable.GetSheet("Eligibility_Class").GetRowCount
+
+DataTable.ExportSheet g_strMainPath & "\Results\" & g_EBCN & ".xls","Temp_Sheet"
+DataTable.ExportSheet g_strMainPath & "\Results\" & g_EBCN & ".xls","Eligibility_Class"
+
+Dim xlApp
+Dim xlBook
+Dim xlSheet
+Const xlAscending1 = 1
+Const xlYes1 = 1
+Set xlApp = CreateObject("Excel.Application")
+Set xlBook = xlApp.Workbooks.Open (g_strMainPath & "\Results\" & g_EBCN & ".xls")
+Set xlSheet = xlBook.Worksheets("Temp_Sheet")
+Set xlSheet2 = xlBook.Worksheets("Eligibility_Class")
+
+Set objRange = xlSheet.UsedRange
+Set objRange2 = xlApp.Range("J1")
+Set objRange3 = xlApp.Range("G1")
+objRange.Sort objRange2, xlAscending1, , , , , , xlYes1
+sv_Flag = 0
+
+xlapp.visible =False
+r1 = sc_ERC
+	For k = 2 to r1+1
+		xlSheet2.activate
+		y = xlApp.cells(k,1).value
+		j = xlApp.cells(k,2).value
+		xlSheet.activate
+		r = sv_TRC
+		for i = 2 to r+1
+			yy = xlApp.cells(i,10).value
+			if yy = y then
+				xlApp.cells(i,11).value = j 
+				sv_Flag = 1
+			elseif yy <> y and sv_Flag = 1 then
+				sv_Flag = 0
+				exit for
+			end if 
+		next 
+	next
+	objRange.Sort objRange3, xlAscending1, , , , , , xlYes1	
+xlBook.save
+xlApp.quit
+
+		DataTable.DeleteSheet "Temp_Sheet"
+		DataTable.DeleteSheet "Eligibility_Class"
+		DataTable.AddSheet "Temp_Sheet"
+		wait(5)
+		DataTable.ImportSheet g_strMainPath & "\Results\" & g_EBCN & ".xls","Temp_Sheet","Temp_Sheet"
+
+		myfilepath = g_strMainPath & "\Results\" & g_EBCN & ".xls"
+		Set objFSO = CreateObject("Scripting.FileSystemObject")
+		Set Deletion = objFSO.GetFile (myfilepath)
+		Deletion.delete
+
+End Function

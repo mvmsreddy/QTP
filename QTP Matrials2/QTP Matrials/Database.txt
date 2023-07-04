@@ -1,0 +1,31 @@
+'======================================================================================
+'SQL Server Select Query
+'======================================================================================
+Dim cn,rs
+Set cn = createobject("ADODB.Connection")
+Set rs = Createobject("ADODB.Recordset")
+cn.open "Provider=SQLOLEDB;Data Source=CAEVWCOVA150;Integrated Security=SSPI;Initial Catalog=UNUMECDB;"
+rs.open "Select * from emp",cn
+While rs.eof<> true
+ sv_Empno = rs("EmpNo")
+sv_EmoName = rs ("EmpName")
+av_Sal = rs ("sal")
+ rs.movenext
+Wend
+rs.close
+cn.close
+'======================================================================================
+'SQL Server Insert Query
+'======================================================================================
+Dim sv_objConnAdCn, sv_strDataFile, sv_strConnection
+Set sv_objConnAdCn = CreateObject("ADODB.Connection")
+sv_strConnection="Provider=SQLOLEDB;Data Source=CAEvQACOE01;Integrated Security=SSPI;Initial Catalog=UNUMECDB;"
+sv_objConnAdCn.Open sv_strConnection
+strsql = "Insert into Emp (EmpNo,EmpName,Sal) Values(07,'Reddy7',70000)"
+sv_objConnAdCn.Execute (strsql)
+sv_objConnAdCn.close
+Set sv_objConnAdCn = Nothing
+'======================================================================================
+'CAEvQACOE01
+'CAEVWCOVA15
+'======================================================================================

@@ -1,0 +1,14 @@
+'==================================================================================================================================
+'#Function Name   : UDF_Move_Res()                         
+'#Description     : The function moves the results folder tp spacified directory
+'#Input Parameters: Dest_path                     
+'#Return Values   : None                 
+'==================================================================================================================================
+
+Public Function UDF_move_res(sv_Dest_path)
+
+	Set fso = createObject("Scripting.FileSystemObject")
+	val = reporter.ReportPath
+	fso.CopyFolder val, sv_Dest_path
+
+End Function

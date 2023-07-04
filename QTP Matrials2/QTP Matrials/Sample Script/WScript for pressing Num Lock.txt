@@ -1,0 +1,7 @@
+hours = 18000
+for i = 1 to hours
+	set WshShell = WScript.CreateObject("WScript.Shell")
+	WshShell.SendKeys "{NUMLOCK}"
+	WScript.Sleep 6000
+Next
+WScript.quit

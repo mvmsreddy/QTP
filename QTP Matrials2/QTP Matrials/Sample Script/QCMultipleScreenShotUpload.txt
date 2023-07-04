@@ -1,0 +1,96 @@
+'##################################################################################################
+'Function to take multiple Screenshots and Save it in Word document and Upload into Quality Center
+'##################################################################################################
+'The below code to take the ScreenShots and save it in a specified path
+'Systemutil.Run "iexplore.exe"
+'Wait(20)
+'Browser("Unum Central - Home").Page("Unum Central - Home").CaptureBitmap StrImgFoldPath&"Unum.png",True
+
+Str_WordDocPath="C:\Documents and Settings\A7U08\Desktop\Dhanapaul"
+StrWordFileName="Test.doc"
+StrImgFoldPath="C:\Documents and Settings\A7U08\Desktop\Dhanapaul\Screenshots"
+strAttachFilePath="C:\Documents and Settings\A7U08\Desktop\Dhanapaul\Test.doc"
+Call SaveImgInWord(Str_WordDocPath,StrWordFileName, StrImgFoldPath)
+Call QCSaveFileAsAttachment(strAttachFilePath,strAttachDesc) 
+
+'###################################################################################################
+'  Function Name:  SaveImgInWord()
+'  Function Description:  This Function saves the specified Image files in MSWord file                            
+'  Function Parameters:   Word File Path, Word File Name, Image folder path
+'  Return Values: None
+'###################################################################################################
+Function SaveImgInWord (Str_WordDocPath,StrWordFileName, StrImgFoldPath)
+
+Dim Fdoc
+Dim i,j
+Dim fso
+Dim fol
+Dim fc
+ 
+Set Fdoc=CreateObject("Scripting.FileSystemObject")
+Str_WordDocPath=Str_WordDocPath&"\"&StrWordFileName
+Set j=Fdoc.createtextfile(Str_WordDocPath)
+Set fso=CreateObject("Scripting.FileSystemObject")
+If (fso.FolderExists(StrImgFoldPath)) Then
+ Set fol = fso.GetFolder(StrImgFoldPath)
+Else
+ Reporter.ReportEvent micInfo,"Folder Existence","ScreenShots Folder  is not present"
+ Exit Function
+End If
+'Get all the files from ScreenShots folder
+Set fc = fol.Files
+'copy Image to a word document
+Set objWord = CreateObject("Word.Application")
+Set objDoc = objWord.Documents.Add()
+Set objSelection = objWord.Selection
+For Each f1 in fc
+	objSelection.TypeText vbCr
+    objSelection.TypeText f1.name
+	objSelection.TypeText vbCr
+	objSelection.TypeText vbCr
+	'From here you can add as many pictures as you want...
+	Set objShape = objSelection.InlineShapes.AddPicture(StrImgFoldPath&"\"&f1.name)
+	objShape.Borders.OutsideLineStyle = wdLineStyleSingle
+	objSelection.TypeText vbCrLf
+	For i=1 to 21
+		objSelection.TypeText vbCr
+	Next
+Next
+'Close the file
+ j.close
+ objDoc.SaveAs Str_WordDocPath
+ objWord.quit
+'Delete the Folder
+'fso.DeleteFolder(StrImgFoldPath)
+End Function
+'#############################################################################################################
+'Function Name:  QCSaveFileAsAttachment
+'Function Description: This Function saves the specified file as attachment to test run in Quality Center
+'Function Parameters:  strAttachFilePath - Path of the file that has to to be attached
+'		       strAttachDesc - Description of the attachment
+'#############################################################################################################
+Function QCSaveFileAsAttachment(strAttachFilePath,strAttachDesc)
+	Dim objRun,strFileName,strPath
+    'QCSaveFileAsAttachment= 0
+	'Get File Name
+	 strFileName=Mid(strAttachFilePath,InstrRev(strAttachFilePath,"\")+1)
+    'Get File Path
+	strPath=Left(strAttachFilePath,InstrRev(strAttachFilePath,"\"))
+	'Check if QTP is connected to Quality Center and file name and paths are valid
+	If QCUtil.IsConnected and strFileName<>"" and strPath<>"" then 
+	'Get Reference to Run object of QC
+		Set objRun = QCUtil.CurrentRun
+        If objRun is Nothing Then Exit Function
+        Set objAttachFact = objRun.Attachments 
+		'Create attachment object and add file
+		Set objAttachment = objAttachFact.AddItem(strFileName) 
+		objAttachment.Description = strAttachDesc
+		objAttachment.Post 
+		'Create Extended Storage object and transfer the file to server
+		Set ExStrg = objAttachment.AttachmentStorage 
+		ExStrg.ClientPath = strPath
+		ExStrg.Save strFileName, True 
+	   ' QCSaveFileAsAttachment= 1
+	End If
+End Function
+

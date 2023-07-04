@@ -1,0 +1,38 @@
+'######################################################################################
+'This Function saves the specified file as an attachment to test run in Quality Center
+'######################################################################################
+
+strAttachFilePath="C:\Documents and Settings\A7U08\Desktop\Emp.xls"
+strAttachDesc="Employee Details"
+Call QCSaveFileAsAttachment(strAttachFilePath,strAttachDesc)
+
+'############################################################################################################
+'Function Name:  QCSaveFileAsAttachment
+'Function Description: This Function saves the specified file as an attachment to test run in Quality Center
+'Function Parameters:  strAttachFilePath - Path of the file that has to to be attached
+'		       strAttachDesc - Description of the attachment
+'#############################################################################################################
+Function QCSaveFileAsAttachment(strAttachFilePath,strAttachDesc)
+	Dim objRun,strFileName,strPath
+    	'QCSaveFileAsAttachment= 0
+	'Get File Name
+	 strFileName=Mid(strAttachFilePath,InstrRev(strAttachFilePath,"\")+1)
+    	'Get File Path
+	strPath=Left(strAttachFilePath,InstrRev(strAttachFilePath,"\"))
+	'Check if QTP is connected to Quality Center and file name and paths are valid
+	If QCUtil.IsConnected and strFileName<>"" and strPath<>"" then 
+	'Get Reference to Run object of QC
+		Set objRun = QCUtil.CurrentRun
+        If objRun is Nothing Then Exit Function
+        Set objAttachFact = objRun.Attachments 
+		'Create attachment object and add file
+		Set objAttachment = objAttachFact.AddItem(strFileName) 
+		objAttachment.Description = strAttachDesc
+		objAttachment.Post 
+		'Create Extended Storage object and transfer the file to server
+		Set ExStrg = objAttachment.AttachmentStorage 
+		ExStrg.ClientPath = strPath
+		ExStrg.Save strFileName, True 
+		'QCSaveFileAsAttachment= 1
+	End If
+End Function
