@@ -1,0 +1,78 @@
+1/13/2013 1:57:13 AM -- *********************Starting Lead Suite****************
+1/13/2013 1:57:17 AM -- Total test  cases Rows 3
+1/13/2013 1:57:17 AM -- Total test  Steps Rows 34
+1/13/2013 1:57:17 AM -- ***************TestCase Under Execution -  CreateLead --- Y***********************
+1/13/2013 1:57:20 AM -- CreateLead -- openbrowser --- Mozilla ----- Pass
+1/13/2013 1:57:20 AM -- CreateLead -- navigate ---  ----- Pass
+1/13/2013 1:57:26 AM -- CreateLead -- verifyTitle ---  ----- Fail - titles did not match . Actual title - Cloud Computing, Customer Relationship Management, (CRM) - Salesforce.com India
+1/13/2013 1:57:26 AM -- ERROR for keyword  verifyTitle -- Fail - titles did not match . Actual title - Cloud Computing, Customer Relationship Management, (CRM) - Salesforce.com India
+1/13/2013 1:57:40 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:57:40 AM -- CreateLead -- input --- loadrunnerjmeter@gmail.com ----- Pass
+1/13/2013 1:57:40 AM -- CreateLead -- input --- pass@1234 ----- Pass
+1/13/2013 1:58:02 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:06 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:09 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:09 AM -- CreateLead -- verifyElementPresence --- Mr. ----- Pass
+1/13/2013 1:58:10 AM -- CreateLead -- selectList --- Mr. ----- Pass
+1/13/2013 1:58:11 AM -- CreateLead -- input --- Larry ----- Pass
+1/13/2013 1:58:11 AM -- CreateLead -- input ---  ----- Pass
+1/13/2013 1:58:12 AM -- CreateLead -- input --- Google ----- Pass
+1/13/2013 1:58:12 AM -- CreateLead -- selectList --- Open ----- Pass
+1/13/2013 1:58:13 AM -- CreateLead -- input --- 2222222222 ----- Pass
+1/13/2013 1:58:13 AM -- CreateLead -- input --- larry@google.com ----- Pass
+1/13/2013 1:58:14 AM -- CreateLead -- selectList --- Hot ----- Pass
+1/13/2013 1:58:14 AM -- CreateLead -- input --- San Hose ----- Pass
+1/13/2013 1:58:15 AM -- CreateLead -- input --- California ----- Pass
+1/13/2013 1:58:15 AM -- CreateLead -- input --- 122131 ----- Pass
+1/13/2013 1:58:16 AM -- CreateLead -- input --- USA ----- Pass
+1/13/2013 1:58:16 AM -- CreateLead -- clickByIndex ---  ----- Pass
+1/13/2013 1:58:18 AM -- CreateLead -- verifyLeadCreation ---  ----- Pass
+1/13/2013 1:58:22 AM -- CreateLead -- verifyText --- Mr. Larry Page ----- object is not found LeadSuccessName
+1/13/2013 1:58:22 AM -- ERROR for keyword  verifyText -- object is not found LeadSuccessName
+1/13/2013 1:58:26 AM -- CreateLead -- verifyText --- 2222222222 ----- object is not found LeadSuccessPhone
+1/13/2013 1:58:26 AM -- ERROR for keyword  verifyText -- object is not found LeadSuccessPhone
+1/13/2013 1:58:27 AM -- CreateLead -- openbrowser --- Mozilla ----- Pass
+1/13/2013 1:58:27 AM -- CreateLead -- navigate ---  ----- Pass
+1/13/2013 1:58:32 AM -- CreateLead -- verifyTitle ---  ----- Fail - titles did not match . Actual title - CRM and Cloud Computing To Grow Your Business - Salesforce.com
+1/13/2013 1:58:32 AM -- ERROR for keyword  verifyTitle -- Fail - titles did not match . Actual title - CRM and Cloud Computing To Grow Your Business - Salesforce.com
+1/13/2013 1:58:39 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:39 AM -- CreateLead -- input --- loadrunnerjmeter@gmail.com ----- Pass
+1/13/2013 1:58:39 AM -- CreateLead -- input --- pass@1234 ----- Pass
+1/13/2013 1:58:48 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:51 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:53 AM -- CreateLead -- click ---  ----- Pass
+1/13/2013 1:58:53 AM -- CreateLead -- verifyElementPresence --- Mr. ----- Pass
+1/13/2013 1:58:54 AM -- CreateLead -- selectList --- Mr. ----- Pass
+1/13/2013 1:58:55 AM -- CreateLead -- input --- Larry ----- Pass
+1/13/2013 1:58:55 AM -- CreateLead -- input --- Page ----- Pass
+1/13/2013 1:58:56 AM -- CreateLead -- input --- Google ----- Pass
+1/13/2013 1:58:56 AM -- CreateLead -- selectList --- Open ----- Pass
+1/13/2013 1:58:57 AM -- CreateLead -- input --- 333333333 ----- Pass
+1/13/2013 1:58:57 AM -- CreateLead -- input --- larry@google.com ----- Pass
+1/13/2013 1:58:58 AM -- CreateLead -- selectList --- Hot ----- Pass
+1/13/2013 1:58:58 AM -- CreateLead -- input --- San Hose ----- Pass
+1/13/2013 1:58:59 AM -- CreateLead -- input --- California ----- Pass
+1/13/2013 1:58:59 AM -- CreateLead -- input --- 122131 ----- Pass
+1/13/2013 1:59:00 AM -- CreateLead -- input --- USA ----- Pass
+1/13/2013 1:59:00 AM -- CreateLead -- clickByIndex ---  ----- Pass
+1/13/2013 1:59:06 AM -- CreateLead -- verifyLeadCreation ---  ----- Pass
+1/13/2013 1:59:06 AM -- CreateLead -- verifyText --- Mr. Larry Page ----- Pass
+1/13/2013 1:59:07 AM -- CreateLead -- verifyText --- 333333333 ----- Pass
+1/13/2013 1:59:07 AM -- ***************TestCase Under Execution -  ConvertLead --- Y***********************
+1/13/2013 1:59:08 AM -- ConvertLead -- defaultLogin ---  ----- Pass
+1/13/2013 1:59:19 AM -- ConvertLead -- convertLead --- Page, Larry ----- Pass
+1/13/2013 1:59:19 AM -- ***************TestCase Under Execution -  DeleteLead --- N***********************
+1/13/2013 1:59:20 AM -- *********************ENDING Lead Suite****************
+1/13/2013 1:59:32 AM -- Total test  cases Rows 2
+1/13/2013 1:59:32 AM -- Total test  Steps Rows 11
+1/13/2013 1:59:32 AM -- ***************TestCase Under Execution -  LoginTest --- Y***********************
+1/13/2013 2:00:00 AM -- LoginTest -- login ---  ----- Pass
+1/13/2013 2:00:00 AM -- LoginTest -- verifyLogin ---  ----- Pass
+1/13/2013 2:00:36 AM -- LoginTest -- login ---  ----- Pass
+1/13/2013 2:00:39 AM -- LoginTest -- verifyLogin ---  ----- Pass
+1/13/2013 2:00:40 AM -- ***************TestCase Under Execution -  MenuTest --- Y***********************
+1/13/2013 2:00:40 AM -- MenuTest -- defaultLogin ---  ----- Pass
+1/13/2013 2:00:45 AM -- MenuTest -- click ---  ----- Pass
+1/13/2013 2:00:48 AM -- MenuTest -- click ---  ----- Pass
+1/13/2013 2:00:49 AM -- MenuTest -- multiSelect --- Cases,Console,Ideas ----- 
+1/13/2013 2:00:49 AM -- ERROR for keyword  multiSelect -- 

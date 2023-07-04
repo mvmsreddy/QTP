@@ -1,0 +1,7 @@
+12/30/2012 4:25:55 AM -- Starting the test EditProductAndVerify
+12/30/2012 4:28:41 AM -- Starting the test EditProductAndVerify
+12/30/2012 4:28:41 AM -- Skipping the iteration 1
+12/30/2012 4:28:42 AM -- Skipping the iteration 2
+12/30/2012 4:29:46 AM -- Starting the test EditProductAndVerify
+12/30/2012 4:29:46 AM -- Skipping the iteration 1
+12/30/2012 4:29:46 AM -- Skipping the iteration 2

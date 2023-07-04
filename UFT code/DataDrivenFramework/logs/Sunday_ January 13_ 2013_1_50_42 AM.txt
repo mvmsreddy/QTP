@@ -1,0 +1,2 @@
+1/13/2013 1:50:42 AM -- Starting AOM Script
+1/13/2013 1:50:43 AM -- QTP opened

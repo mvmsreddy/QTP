@@ -1,0 +1,40 @@
+Dim qtpApp,logFileName,ActionContent,ActionName
+' init logfile
+logfileName = replace(replace(now,"/","_"),":","_")&".txt"
+Set qtpApp=createObject("Quicktest.Application")
+qtpApp.Visible=true
+
+If  not qtpApp.Launched  Then
+	' launch qtp
+qtpApp.Launch
+End If
+LogThis "QTP opened"
+
+qtpApp.options.run.RunMode="Fast"
+
+
+qtpApp.Open "E:\Tools\QTP\Recording Scripts\QTP AOM\Test_Env"
+qtpApp.Test.Environment("tool")="QTP"
+' Add new environment variables
+qtpApp.Test.Run
+
+
+
+
+'WScript.sleep(5000)
+'qtpApp.Quit
+
+'Set qtpApp=nothing
+
+
+Function LogThis(msg)
+Dim fso,myfile
+Const ForAppening=8
+Set fso=CreateObject("Scripting.FileSystemObject")
+Set myfile=fso.OpenTextFile("E:\Tools\QTP\Recording Scripts\QTP AOM\logs\"&logfileName,ForAppening,true)
+myfile.writeLine now &"--" &msg
+
+Set fso=Nothing
+Set myfile=nothing
+End function
+

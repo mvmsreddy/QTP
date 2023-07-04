@@ -1,0 +1,18 @@
+12/30/2012 4:25:42 AM -- Starting the test LoginTest
+12/30/2012 4:25:42 AM -- Total Rows are 4
+12/30/2012 4:25:44 AM -- Skipping  Login Test for iteration 1
+12/30/2012 4:25:44 AM -- Skipping  Login Test for iteration 2
+12/30/2012 4:25:44 AM -- Skipping  Login Test for iteration 3
+12/30/2012 4:25:44 AM -- Skipping  Login Test for iteration 4
+12/30/2012 4:28:31 AM -- Starting the test LoginTest
+12/30/2012 4:28:31 AM -- Total Rows are 4
+12/30/2012 4:28:31 AM -- Skipping  Login Test for iteration 1
+12/30/2012 4:28:31 AM -- Skipping  Login Test for iteration 2
+12/30/2012 4:28:31 AM -- Skipping  Login Test for iteration 3
+12/30/2012 4:28:31 AM -- Skipping  Login Test for iteration 4
+12/30/2012 4:29:34 AM -- Starting the test LoginTest
+12/30/2012 4:29:34 AM -- Total Rows are 4
+12/30/2012 4:29:36 AM -- Skipping  Login Test for iteration 1
+12/30/2012 4:29:36 AM -- Skipping  Login Test for iteration 2
+12/30/2012 4:29:36 AM -- Skipping  Login Test for iteration 3
+12/30/2012 4:29:36 AM -- Skipping  Login Test for iteration 4

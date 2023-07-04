@@ -1,0 +1,22 @@
+<Environment>
+	<Variable>
+		<Name>ApplicationLocation</Name>
+		<Value>H:\Program Files\HP\QuickTest Professional\samples\flight\app\flight4a.exe</Value>
+	</Variable>
+	<Variable>
+		<Name>LoginUserID</Name>
+		<Value>mercury</Value>
+	</Variable>
+	<Variable>
+		<Name>Password</Name>
+		<Value>4fa7843e34a868b9090e9416ae6550eb46013ff6</Value>
+	</Variable>
+	<Variable>
+	         <Name>DataXL</Name>
+	         <Value>E:\Tools\QTP\Recording Scripts\module 15\Fligh APP Example\Flight Data.xls</Value>
+	</Variable>
+	<Variable>
+	         <Name>FinalXL</Name>
+	         <Value>E:\Tools\QTP\Recording Scripts\module 15\Fligh APP Example\Final.xls</Value>
+	</Variable>
+</Environment>

@@ -1,0 +1,3 @@
+1/13/2013 1:49:49 AM -- Starting AOM Script
+1/13/2013 1:49:50 AM -- QTP opened
+1/13/2013 1:49:50 AM -- EXECUTING TEST CASE LoginTestIN TESTSET TestSet1

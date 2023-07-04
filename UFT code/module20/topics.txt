@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+Why we need to connect to database
+What types of databases are supported
+Installing sqlserver database - sql server and sql server management studio
+Installing mysql database
+Adodb.connection factory
+What is connection String
+Generating connection String for SQL Server Database
+Generating connection String for Mysql Database
+Connecting to Sql Server and Mysql Databases with VB
+Executing CRUD operations
+Resultset Object
+ADODB.Command factory
+Executing stored procedures from QTP Script
+
+
+sa / pass!@#123
+
+
+
+
+mysql -u root
+show databases;
+create database qtp_practice_mysql;
+
+insert into Location values('Bejing','China');
+
+
+-----------------------------------------------
+
+IF OBJECT_ID ( 'locations_world', 'P' ) IS NOT NULL 
+    DROP PROCEDURE locations_world;
+GO
+create  PROCEDURE locations_world
+	-- Add the parameters for the stored procedure here
+	@city varchar(50),
+	@count varchar(50) OUTPUT
+
+AS
+BEGIN
+
+	select @count = a.Country from Country a where a.City=@city
+	
+	return 
+
+
+END
+
+
+
+
+
+
+
+
+
+
+
+
+
+

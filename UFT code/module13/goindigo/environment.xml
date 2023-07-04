@@ -1,0 +1,11 @@
+<Environment>
+	<Variable>
+		<Name>XLFileLocation</Name>
+		<Value>E:\Tools\QTP\Recording Scripts\module 15\goindigo\Flight.xls</Value>
+	</Variable>
+	<Variable>
+		<Name>TestSite</Name>
+		<Value>goindigo.in</Value>
+	</Variable>
+	
+</Environment>

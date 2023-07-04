@@ -1,0 +1,137 @@
+Dim currentDirectory,logFileName,logFilePath,qtpApp,xlsFilePath,xlsVBSFilePath,totalTestCases,currTestID,currTestCaseName,currTestCaseRunmode,dataDict,totalDataSets,currDataSet
+Const sheetName="Test Cases"
+Const dataSheetName="Test Data"
+
+' Get the current Directory Path
+Set WshShell=CreateObject("Wscript.Shell")
+currentDirectory = WshShell.CurrentDirectory
+msgbox currentDirectory
+Set WshShell=Nothing
+
+
+' initialize file Paths
+logFileName=Replace(Replace(Replace(now," ","_"),"/","_"),":","_")&".txt"
+logFilePath= currentDirectory &"\logs\"&logFileName
+'msgbox logFilePath
+xlsVBSFilePath=currentDirectory &"\Function Libraries\common\xls.vbs"
+'msgbox xlsFilePath
+
+'LogThis "Starting"
+loadFile(xlsVBSFilePath)
+LogThis "Starting the test"
+openQTP
+executeTestSet("TestSet1")
+
+destroyXLSApp
+
+
+
+
+
+
+
+''''''''''''''''''''''''''''Functions'''''''''''''''''''''''''''''''''''
+' Loading vb files
+Function loadFile(filepath)
+DIM objShell
+set objShell = wscript.createObject("wscript.shell")
+Dim fsObj
+Set fsObj = CreateObject("Scripting.FileSystemObject")
+Dim vbsFile
+Set vbsFile = fsObj.OpenTextFile(filepath, 1, False)
+Dim myFunctionsStr 
+myFunctionsStr = vbsFile.ReadAll
+'msgbox myFunctionsStr
+vbsFile.Close
+Set vbsFile = Nothing
+Set fsObj = Nothing
+ExecuteGlobal myFunctionsStr 
+End Function
+
+'Open QTP
+Function openQTP
+LogThis "OPening QTP"
+Set qtpApp = CreateObject("QuickTest.Application")
+qtpApp.Visible=True
+
+If Not qtpApp.launched Then
+qtpApp.launch
+End If
+qtpApp.Options.Run.RunMode = "Fast"
+LogThis "QTP is Opened"
+End Function
+
+'Execute all test cases in a testset
+Function executeTestSet(testSetName)
+LogThis " ***********Executing the test set " & testSetName &" *****************"
+xlsFilePath=currentDirectory &"/Test Cases/"&testSetName&".xlsx"
+LogThis xlsFilePath
+totalTestCases=getRowCount(xlsFilePath,sheetName)
+LogThis "Total Test Cases are " & totalTestCases-1
+
+For currTestID=2 To totalTestCases
+currTestCaseName=readData(xlsFilePath,sheetName,currTestID,1)
+currTestCaseRunmode=readData(xlsFilePath,sheetName,currTestID,3)
+If currTestCaseRunmode = "Y" Then
+LogThis "EXECUTED TEST -> " & currTestCaseName & " --- " & currTestCaseRunmode
+
+' execute test
+' 1) Open the test
+' 2) Env vars
+' 3) Load FL
+' 4) Run
+' 5) Result
+'qtpApp.Open currentDirectory &"\Scripts\"&testSetName&"\"&currTestCaseName
+'associateCommonLibs
+'qtpApp.Test.environment("logFilePath")=logFilePath
+'qtpApp.Test.Run
+'Logthis "Exection result => "& qtpApp.Test.LastRunResults.Status
+
+' Reading the data
+
+Set dataDict = getData(xlsFilePath,dataSheetName,currTestCaseName)
+totalDataSets = dataDict.count
+
+For currDataSet = 1 To dataDict.count
+Set currDataDic = dataDict.item(currDataSet)
+temp =currDataDic.keys
+
+If Not currDataDic.item("Runmode")="Y" Then
+' Skip Test
+LogThis "SKIPPED TEST -> " & currTestCaseName & " --- " & currTestCaseRunmode
+Exit for
+End If
+
+' add parameters in action
+For i=0 to ubound (temp)
+LogThis temp(i) & " ---- " & currDataDic.item(temp(i))
+
+Next
+
+' Execute test
+result="Pass"
+reportSuccess
+
+next
+
+
+
+LogThis dataDict.Item("Runmode") &" -- " & dataDict.Item("Col1")
+Else
+' Skip Test
+LogThis "SKIPPED TEST -> " & currTestCaseName & " --- " & currTestCaseRunmode
+End if
+next
+
+
+	
+End Function
+
+Function associateCommonLibs()
+qtpApp.Test.Settings.Resources.Libraries.add currentDirectory&"/Function Libraries/common/BrowserUtil.vbs"
+qtpApp.Test.Settings.Resources.Libraries.add currentDirectory&"/Function Libraries/common/TestManager.vbs"
+qtpApp.Test.Settings.Resources.Libraries.add currentDirectory&"/Function Libraries/common/verification.vbs"
+qtpApp.Test.Settings.Resources.Libraries.add currentDirectory&"/Function Libraries/common/xls.vbs"
+End function
+
+

@@ -1,0 +1,13 @@
+12/30/2012 6:57:48 PM -- Starting AOM Script
+12/30/2012 6:57:48 PM -- QTP opened
+12/30/2012 6:57:49 PM -- EXECUTING TEST CASE LoginTestIN TESTSET TestSet1
+12/30/2012 6:57:53 PM -- Starting the test LoginTest
+12/30/2012 6:57:53 PM -- Total Rows are 4
+12/30/2012 6:58:07 PM -- Logging in with A1/B1
+12/30/2012 6:58:15 PM -- Passed  Login Test for iteration 1
+12/30/2012 6:58:20 PM -- Logging in with A2/B2
+12/30/2012 6:58:26 PM -- Passed  Login Test for iteration 2
+12/30/2012 6:58:26 PM -- Skipping  Login Test for iteration 3
+12/30/2012 6:58:30 PM -- Logging in with ashish_ait@rediffmail.com/pass@1234
+12/30/2012 6:58:41 PM -- Passed  Login Test for iteration 4
+12/30/2012 6:58:41 PM -- EXECUTING TEST CASE AddProductAndVerifyIN TESTSET TestSet1

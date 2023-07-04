@@ -1,0 +1,45 @@
+Dim qtpApp,logFileName,ActionContent,ActionName
+' init logfile
+logfileName = replace(replace(now,"/","_"),":","_")&".txt"
+Set qtpApp=createObject("Quicktest.Application")
+qtpApp.Visible=true
+
+If  not qtpApp.Launched  Then
+	' launch qtp
+qtpApp.Launch
+End If
+LogThis "QTP opened"
+
+qtpApp.options.run.RunMode="Fast"
+
+
+ActionContent ="print ""firstline""" & vbCrLf &"print ""secondline"""
+ActionName="MyAction"
+ActionDescr="any description"
+
+Set NewAction = qtpApp.Test.AddNewAction(ActionName, ActionDescr, ActionContent, False, qtAtBegining)
+' Add in existing action
+
+
+
+
+
+
+
+'WScript.sleep(5000)
+'qtpApp.Quit
+
+'Set qtpApp=nothing
+
+
+Function LogThis(msg)
+Dim fso,myfile
+Const ForAppening=8
+Set fso=CreateObject("Scripting.FileSystemObject")
+Set myfile=fso.OpenTextFile("E:\Tools\QTP\Recording Scripts\QTP AOM\logs"&logfileName,ForAppening,true)
+myfile.writeLine now &"--" &msg
+
+Set fso=Nothing
+Set myfile=nothing
+End function
+

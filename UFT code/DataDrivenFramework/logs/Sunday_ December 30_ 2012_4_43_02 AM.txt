@@ -1,0 +1,14 @@
+12/30/2012 4:43:08 AM -- Starting the test LoginTest
+12/30/2012 4:43:08 AM -- Total Rows are 4
+12/30/2012 4:43:09 AM -- Skipping  Login Test for iteration 1
+12/30/2012 4:43:09 AM -- Skipping  Login Test for iteration 2
+12/30/2012 4:43:09 AM -- Skipping  Login Test for iteration 3
+12/30/2012 4:43:09 AM -- Skipping  Login Test for iteration 4
+12/30/2012 4:43:14 AM -- Skipping the iteration 1
+12/30/2012 4:43:16 AM -- Skipping the iteration 2
+12/30/2012 4:43:20 AM -- Starting the test EditProductAndVerify
+12/30/2012 4:43:20 AM -- Skipping the iteration 1
+12/30/2012 4:43:21 AM -- Skipping the iteration 2
+12/30/2012 4:43:26 AM -- Skipping the iteration 1
+12/30/2012 4:43:27 AM -- Skipping the iteration 2
+12/30/2012 4:43:30 AM -- Add task test is executing

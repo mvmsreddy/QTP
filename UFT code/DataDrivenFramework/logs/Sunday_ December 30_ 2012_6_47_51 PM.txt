@@ -1,0 +1,23 @@
+12/30/2012 6:47:51 PM -- Starting AOM Script
+12/30/2012 6:47:51 PM -- QTP opened
+12/30/2012 6:47:52 PM -- EXECUTING TEST CASE LoginTestIN TESTSET TestSet1
+12/30/2012 6:47:55 PM -- Starting the test LoginTest
+12/30/2012 6:47:55 PM -- Total Rows are 4
+12/30/2012 6:48:00 PM -- Logging in with A1/B1
+12/30/2012 6:48:09 PM -- Passed  Login Test for iteration 1
+12/30/2012 6:48:15 PM -- Logging in with A2/B2
+12/30/2012 6:48:20 PM -- Passed  Login Test for iteration 2
+12/30/2012 6:48:20 PM -- Skipping  Login Test for iteration 3
+12/30/2012 6:48:27 PM -- Logging in with ashish_ait@rediffmail.com/pass@1234
+12/30/2012 6:48:38 PM -- Passed  Login Test for iteration 4
+12/30/2012 6:48:38 PM -- EXECUTING TEST CASE AddProductAndVerifyIN TESTSET TestSet1
+12/30/2012 6:48:54 PM -- EXECUTING TEST CASE EditProductAndVerifyIN TESTSET TestSet1
+12/30/2012 6:48:58 PM -- Starting the test EditProductAndVerify
+12/30/2012 6:48:58 PM -- Skipping the iteration 1
+12/30/2012 6:49:00 PM -- Skipping the iteration 2
+12/30/2012 6:49:00 PM -- EXECUTING TEST CASE AddEventTestIN TESTSET TestSet2
+12/30/2012 6:49:04 PM -- Skipping the iteration 1
+12/30/2012 6:49:05 PM -- Skipping the iteration 2
+12/30/2012 6:49:05 PM -- EXECUTING TEST CASE AddTaskTestIN TESTSET TestSet2
+12/30/2012 6:49:07 PM -- Add task test is executing
+12/30/2012 6:49:09 PM -- AOM Script finishes
